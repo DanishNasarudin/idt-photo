@@ -37,6 +37,7 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
         const dataTransfer = new DataTransfer();
         updatedPreviews.forEach((file) => dataTransfer.items.add(file));
         hiddenInputRef.current.files = dataTransfer.files;
+        hiddenInputRef.current.setCustomValidity("");
       }
 
       return updatedPreviews;
@@ -59,8 +60,22 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
     };
   }, [previews]);
 
-  const handleRemoveImage = (imageId: string) => {
-    setPreviews((prev) => prev.filter((item) => item.name !== imageId));
+  const handleRemoveImage = (imageName: string) => {
+    setPreviews((prev) => {
+      const filtered = prev.filter((item) => item.name !== imageName);
+
+      if (hiddenInputRef.current) {
+        const dataTransfer = new DataTransfer();
+        filtered.forEach((file) => dataTransfer.items.add(file));
+        hiddenInputRef.current.files = dataTransfer.files;
+        if (dataTransfer.files.length === 0) {
+          hiddenInputRef.current.setCustomValidity(
+            "Please select at least one image to upload."
+          );
+        }
+      }
+      return filtered;
+    });
   };
 
   return (
@@ -74,7 +89,19 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
         required
         style={{ opacity: 0 }}
         ref={hiddenInputRef}
-        className="hidden"
+        className="absolute pointer-events-none top-[50%] right-[50%] translate-x-[50%] translate-y-[-50%]"
+        onInvalid={(e: React.FormEvent<HTMLInputElement>) => {
+          const target = e.target as HTMLInputElement;
+          target.setCustomValidity(
+            "Please select at least one image to upload."
+          );
+        }}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          const target = e.target as HTMLInputElement;
+          if (target.files && target.files.length > 0) {
+            target.setCustomValidity("");
+          }
+        }}
       />
       <input {...getInputProps()} className="hidden" />
       {previews.length === 0 ? (
@@ -134,7 +161,15 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
             variant={"destructive"}
             size={"icon"}
             className="absolute top-0 right-0 translate-x-[140%]"
-            onClick={() => setPreviews([])}
+            onClick={() => {
+              setPreviews([]);
+              if (hiddenInputRef.current) {
+                hiddenInputRef.current.value = "";
+                hiddenInputRef.current.setCustomValidity(
+                  "Please select at least one image to upload."
+                );
+              }
+            }}
           >
             <Trash2 />
           </Button>
