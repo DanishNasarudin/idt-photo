@@ -1,0 +1,133 @@
+"use client";
+import { Plus, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "../ui/button";
+import TooltipWrapper from "./tooltip-wrapper";
+
+type Props = {
+  onValueChange?: (newValue: File[]) => void;
+};
+
+export interface PreviewFile extends File {
+  preview: string;
+}
+
+export default function DataImage({ onValueChange = () => {} }: Props) {
+  const hiddenInputRef = useRef<HTMLInputElement | null>(null);
+  const [previews, setPreviews] = useState<PreviewFile[]>([]);
+
+  const onDrop = useCallback((incomingFiles: File[]) => {
+    setPreviews((prev) => {
+      const existingKeys = new Set(prev.map((file) => file.name + file.size));
+
+      const newUniqueFiles = incomingFiles.filter(
+        (file) => !existingKeys.has(file.name + file.size)
+      );
+
+      const newPreviewFiles: PreviewFile[] = newUniqueFiles.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        })
+      );
+
+      const updatedPreviews = [...prev, ...newPreviewFiles];
+
+      if (hiddenInputRef.current) {
+        const dataTransfer = new DataTransfer();
+        updatedPreviews.forEach((file) => dataTransfer.items.add(file));
+        hiddenInputRef.current.files = dataTransfer.files;
+      }
+
+      return updatedPreviews;
+    });
+  }, []);
+
+  const { getRootProps, getInputProps, open } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [],
+    },
+    noClick: true,
+    noKeyboard: true,
+  });
+
+  useEffect(() => {
+    onValueChange(previews);
+    return () => {
+      previews.forEach((file) => URL.revokeObjectURL(file.preview));
+    };
+  }, [previews]);
+
+  const handleRemoveImage = (imageId: string) => {
+    setPreviews((prev) => prev.filter((item) => item.name !== imageId));
+  };
+
+  return (
+    <div
+      {...getRootProps()}
+      className="bg-card w-full p-8 rounded-lg border-dashed border-border border-[2px] min-h-64 flex items-center select-none"
+    >
+      <input
+        type="file"
+        name={"images"}
+        required
+        style={{ opacity: 0 }}
+        ref={hiddenInputRef}
+        className="hidden"
+      />
+      <input {...getInputProps()} className="hidden" />
+      {previews.length === 0 ? (
+        <div className="flex flex-col items-center w-full gap-2">
+          <p className="text-center text-nowrap select-none cursor-default">
+            Drop images here
+          </p>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className="max-w-max"
+            onClick={() => open()}
+          >
+            Bulk Select
+          </Button>
+        </div>
+      ) : (
+        <div className="w-full grid grid-cols-3 gap-4">
+          {previews.map((file: PreviewFile) => (
+            <div
+              key={file.name + file.size}
+              className="border p-2 rounded-lg relative space-y-2"
+            >
+              <img
+                src={file.preview}
+                alt={file.name}
+                className="w-full h-auto object-cover rounded-lg aspect-square"
+                draggable={false}
+              />
+              <TooltipWrapper content={file.name}>
+                <p className="truncate w-full cursor-default">{file.name}</p>
+              </TooltipWrapper>
+              <Button
+                variant={"outline"}
+                size={"icon"}
+                className="h-8 w-8 absolute top-0 right-0 translate-x-[30%] translate-y-[-30%] z-[5] !bg-card hover:!bg-destructive"
+                onClick={() => handleRemoveImage(file.name)}
+              >
+                <X />
+              </Button>
+            </div>
+          ))}
+          <button
+            className="w-full aspect-square rounded-lg border-border border-[1px] flex justify-center items-center flex-col text-foreground/60 text-center cursor-pointer"
+            onClick={open}
+          >
+            <Plus />
+            Add more
+            <br />
+            images
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
