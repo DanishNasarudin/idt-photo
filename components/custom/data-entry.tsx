@@ -4,19 +4,106 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import DataImage from "./data-image";
+import DataImage, { PreviewFile } from "./data-image";
+import DataPreview from "./data-preview";
+
+export type SanitiseInputProps = {
+  invNumber: string;
+  total: string;
+  originalContent: string;
+  nasLocation: string;
+  image: PreviewFile | null;
+  errorMessage: string | null;
+};
 
 export default function DataEntry() {
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<PreviewFile[]>([]);
   const [specs, setSpecs] = useState("");
-  const [nasLocatiom, setNasLocation] = useState("");
+  const [nasLocation, setNasLocation] = useState("");
+  const [sanitisedData, setSanitisedData] = useState<SanitiseInputProps[]>([]);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const sanitiseInput = (): SanitiseInputProps[] => {
+    const specsRegex = /INV#:\s*(\S*)[\s\S]*?Total\s*:\s*(RM\s?[0-9,]+)/gi;
+    const invoices = Array.from(specs.matchAll(specsRegex));
+    const filteredInvoices = invoices
+      .map((item) => item[1].replace(/-/g, ""))
+      .filter((item) => item);
 
-    startTransition(() => {});
+    const requiredSpecs = ["INV#", "CPU", "GPU", "CASE", "MOBO", "RAM", "PSU"];
+
+    return invoices.map((inv) => {
+      const invoiceNumber = inv[1].replace(/-/g, "");
+      const invoiceTotal = inv[2].replace(/\s+(?=\d)|,/g, "").replace(" ", "");
+
+      let originalContent = inv[0]
+        .replace(/Total\s*:\s*/i, "Total: ")
+        .replace(/(?<=RAM:\s*)GSKILL/i, "G.SKILL")
+        .replace(/(?<=CPU:\s*)INTEL(?!\s+CORE)/i, "INTEL CORE")
+        .trim();
+
+      const assignedImage =
+        images.find((file) => {
+          const regex = new RegExp(`${invoiceNumber}(?:\\s*\\(\\d+\\))?`, "i");
+          return regex.test(file.name);
+        }) || null;
+
+      const missingSpecs = requiredSpecs.filter(
+        (spec) => !originalContent.includes(spec)
+      );
+
+      const existingInvoices =
+        filteredInvoices.filter((i) => i === invoiceNumber).length > 1;
+
+      let errorMessage = "";
+
+      if (!invoiceNumber) {
+        errorMessage += `Missing or empty INV#, ensure that the invoice number is provided.\n`;
+      }
+
+      if (existingInvoices) {
+        errorMessage += `Multiple INV#: ${invoiceNumber} detected, ensure invoice number is unique.\n`;
+      }
+
+      if (!assignedImage) {
+        errorMessage += `Missing image, ensure image filename matches INV#.\n`;
+      }
+
+      if (missingSpecs.length > 0) {
+        errorMessage += `Missing ${missingSpecs.join(
+          ", "
+        )}, ensure spec list format is correct.\n`;
+      }
+
+      return {
+        invNumber: invoiceNumber,
+        total: invoiceTotal,
+        originalContent,
+        nasLocation,
+        image: assignedImage,
+        errorMessage: errorMessage || null,
+      };
+    });
   };
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      const sanitised = sanitiseInput();
+      setSanitisedData(sanitised);
+      if (
+        sanitised.some((item) => item.errorMessage !== null) ||
+        sanitisedData.some((item) => item.errorMessage !== null)
+      )
+        return;
+
+      console.log("READY CONFIRM");
+
+      startTransition(() => {});
+    },
+    [sanitisedData, setSanitisedData, sanitiseInput]
+  );
 
   const handleOnValueChange = useCallback((id: string, newValue: any) => {
     switch (id) {
@@ -36,7 +123,7 @@ export default function DataEntry() {
 
   return (
     <form
-      className="flex flex-col gap-4 max-w-[600px] w-full"
+      className="flex flex-col gap-4 max-w-[800px] w-full"
       onSubmit={handleSubmit}
     >
       <div className="space-y-2">
@@ -63,7 +150,23 @@ export default function DataEntry() {
           onChange={(e) => handleOnValueChange(e.target.id, e.target.value)}
         />
       </div>
-      <Button type="submit">Submit</Button>
+      <div className="flex w-full justify-end gap-2">
+        {sanitisedData.length > 0 &&
+        !sanitisedData.some((item) => item.errorMessage !== null) ? (
+          <Button
+            type="submit"
+            className="bg-green-700 hover:bg-green-800 max-w-max"
+          >
+            Confirm
+          </Button>
+        ) : (
+          <Button type="submit" className="max-w-max">
+            {sanitisedData.length === 0 ? "Submit" : "Revalidate"}
+          </Button>
+        )}
+      </div>
+
+      {sanitisedData.length > 0 && <DataPreview data={sanitisedData} />}
     </form>
   );
 }
