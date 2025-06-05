@@ -1,6 +1,6 @@
 "use client";
 import { convertFileToWebP } from "@/lib/utils";
-import { Plus, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
@@ -17,6 +17,7 @@ export interface PreviewFile extends File {
 export default function DataImage({ onValueChange = () => {} }: Props) {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
   const [previews, setPreviews] = useState<PreviewFile[]>([]);
+  const [converting, setConverting] = useState(false);
 
   const onDrop = useCallback(
     async (incomingFiles: File[]) => {
@@ -26,22 +27,27 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
       );
       if (uniqueFiles.length === 0) return;
 
-      const converted: File[] = await Promise.all(
-        uniqueFiles.map((file) => convertFileToWebP(file))
-      );
+      setConverting(true);
+      try {
+        const converted: File[] = await Promise.all(
+          uniqueFiles.map((file) => convertFileToWebP(file))
+        );
 
-      const newPreviewFiles: PreviewFile[] = converted.map((file) =>
-        Object.assign(file, { preview: URL.createObjectURL(file) })
-      );
+        const newPreviewFiles: PreviewFile[] = converted.map((file) =>
+          Object.assign(file, { preview: URL.createObjectURL(file) })
+        );
 
-      const updated = [...previews, ...newPreviewFiles];
-      setPreviews(updated);
+        const updated = [...previews, ...newPreviewFiles];
+        setPreviews(updated);
 
-      if (hiddenInputRef.current) {
-        const dt = new DataTransfer();
-        updated.forEach((file) => dt.items.add(file));
-        hiddenInputRef.current.files = dt.files;
-        hiddenInputRef.current.setCustomValidity("");
+        if (hiddenInputRef.current) {
+          const dt = new DataTransfer();
+          updated.forEach((file) => dt.items.add(file));
+          hiddenInputRef.current.files = dt.files;
+          hiddenInputRef.current.setCustomValidity("");
+        }
+      } finally {
+        setConverting(false);
       }
     },
     [previews]
@@ -108,19 +114,21 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
       />
       <input {...getInputProps()} className="hidden" />
       {previews.length === 0 ? (
-        <div className="flex flex-col items-center w-full gap-2">
-          <p className="text-center text-nowrap select-none cursor-default">
-            Drop images here
-          </p>
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            className="max-w-max"
-            onClick={() => open()}
-          >
-            Bulk Select
-          </Button>
-        </div>
+        !converting && (
+          <div className="flex flex-col items-center w-full gap-2">
+            <p className="text-center text-nowrap select-none cursor-default">
+              Drop images here
+            </p>
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              className="max-w-max"
+              onClick={() => open()}
+            >
+              Bulk Select
+            </Button>
+          </div>
+        )
       ) : (
         <div className="w-full grid grid-cols-3 gap-4">
           {previews.map((file: PreviewFile) => (
@@ -177,6 +185,12 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
             <Trash2 />
           </Button>
         </TooltipWrapper>
+      )}
+      {converting && (
+        <div className="flex flex-col items-center w-full gap-2">
+          <Loader2 className="animate-spin" />
+          <p>Converting image to webp</p>
+        </div>
       )}
     </div>
   );
