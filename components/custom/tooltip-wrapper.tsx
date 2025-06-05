@@ -10,9 +10,13 @@ import {
 export default function TooltipWrapper({
   children,
   content,
+  side,
+  align,
 }: {
   children: React.ReactNode;
   content: string;
+  side?: "top" | "right" | "bottom" | "left";
+  align?: "center" | "start" | "end";
 }) {
   return (
     <TooltipProvider>
@@ -23,7 +27,9 @@ export default function TooltipWrapper({
             buttonVariants({ variant: "outline", size: "sm" }),
             "text-secondary-foreground"
           )}
-          classNameArrow={"bg-card fill-card"}
+          classNameArrow={"bg-background fill-background border-border"}
+          side={side}
+          align={align}
         >
           <p>{content}</p>
         </TooltipContent>

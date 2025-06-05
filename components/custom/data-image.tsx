@@ -1,5 +1,5 @@
 "use client";
-import { Plus, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
@@ -66,7 +66,7 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
   return (
     <div
       {...getRootProps()}
-      className="bg-card w-full p-8 rounded-lg border-dashed border-border border-[2px] min-h-64 flex items-center select-none"
+      className="relative bg-card w-full p-8 rounded-lg border-dashed border-border border-[2px] min-h-64 flex items-center select-none"
     >
       <input
         type="file"
@@ -127,6 +127,18 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
             images
           </button>
         </div>
+      )}
+      {previews.length > 0 && (
+        <TooltipWrapper content="Delete all images" side="right">
+          <Button
+            variant={"destructive"}
+            size={"icon"}
+            className="absolute top-0 right-0 translate-x-[140%]"
+            onClick={() => setPreviews([])}
+          >
+            <Trash2 />
+          </Button>
+        </TooltipWrapper>
       )}
     </div>
   );
