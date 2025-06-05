@@ -1,4 +1,5 @@
 "use client";
+import { convertFileToWebP } from "@/lib/utils";
 import { Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -17,32 +18,34 @@ export default function DataImage({ onValueChange = () => {} }: Props) {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
   const [previews, setPreviews] = useState<PreviewFile[]>([]);
 
-  const onDrop = useCallback((incomingFiles: File[]) => {
-    setPreviews((prev) => {
-      const existingKeys = new Set(prev.map((file) => file.name + file.size));
-
-      const newUniqueFiles = incomingFiles.filter(
+  const onDrop = useCallback(
+    async (incomingFiles: File[]) => {
+      const existingKeys = new Set(previews.map((f) => f.name + f.size));
+      const uniqueFiles = incomingFiles.filter(
         (file) => !existingKeys.has(file.name + file.size)
       );
+      if (uniqueFiles.length === 0) return;
 
-      const newPreviewFiles: PreviewFile[] = newUniqueFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
+      const converted: File[] = await Promise.all(
+        uniqueFiles.map((file) => convertFileToWebP(file))
       );
 
-      const updatedPreviews = [...prev, ...newPreviewFiles];
+      const newPreviewFiles: PreviewFile[] = converted.map((file) =>
+        Object.assign(file, { preview: URL.createObjectURL(file) })
+      );
+
+      const updated = [...previews, ...newPreviewFiles];
+      setPreviews(updated);
 
       if (hiddenInputRef.current) {
-        const dataTransfer = new DataTransfer();
-        updatedPreviews.forEach((file) => dataTransfer.items.add(file));
-        hiddenInputRef.current.files = dataTransfer.files;
+        const dt = new DataTransfer();
+        updated.forEach((file) => dt.items.add(file));
+        hiddenInputRef.current.files = dt.files;
         hiddenInputRef.current.setCustomValidity("");
       }
-
-      return updatedPreviews;
-    });
-  }, []);
+    },
+    [previews]
+  );
 
   const { getRootProps, getInputProps, open } = useDropzone({
     onDrop,
