@@ -1,4 +1,4 @@
-import ClerkProvider from "./providers/clerk-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "./providers/theme-provider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -9,7 +9,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <ClerkProvider>{children}</ClerkProvider>
+      {/* <ClerkProvider> */}
+      {children}
+      <Toaster richColors />
+      {/* </ClerkProvider> */}
     </ThemeProvider>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -21,7 +22,6 @@ export default function DataEntry() {
   const [specs, setSpecs] = useState("");
   const [nasLocation, setNasLocation] = useState("");
   const [sanitisedData, setSanitisedData] = useState<SanitiseInputProps[]>([]);
-  const [isPending, startTransition] = useTransition();
 
   const sanitiseInput = (): SanitiseInputProps[] => {
     const specsRegex = /INV#:\s*(\S*)[\s\S]*?Total\s*:\s*(RM\s?[0-9,]+)/gi;
@@ -86,23 +86,78 @@ export default function DataEntry() {
     });
   };
 
+  const uploadFile = async (
+    file: File,
+    toastId: string | number
+  ): Promise<string> => {
+    toast.loading(`Uploading ${file.name}`, { id: toastId });
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      toast.error(`Failed to upload ${file.name}`, { id: toastId });
+      throw new Error("Upload failed");
+    }
+
+    const json = await response.json();
+    return json.path as string;
+  };
+
   const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
       const sanitised = sanitiseInput();
       setSanitisedData(sanitised);
       if (
         sanitised.some((item) => item.errorMessage !== null) ||
-        sanitisedData.some((item) => item.errorMessage !== null)
+        sanitisedData.some((item) => item.errorMessage !== null) ||
+        sanitisedData.length === 0
       )
         return;
 
-      console.log("READY CONFIRM");
+      const toastId = toast.loading("Starting upload...");
+      const nameToPath: Record<string, string> = {};
 
-      startTransition(() => {});
+      try {
+        for (const img of images) {
+          const path = await uploadFile(img, toastId);
+          nameToPath[img.name] = path;
+        }
+
+        toast.loading("Inserting to database...", { id: toastId });
+
+        const payload = sanitised.map((item) => ({
+          invNumber: item.invNumber,
+          total: item.total,
+          originalContent: item.originalContent,
+          nasLocation: item.nasLocation,
+          imagePath: item.image ? nameToPath[item.image.name] : null,
+          status: "Ready",
+        }));
+
+        const res = await fetch("/api/insert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) throw new Error("Insert failed");
+        setSanitisedData([]);
+        setSpecs("");
+        setNasLocation("");
+        setImages([]);
+        toast.success("Data saved successfully", { id: toastId });
+      } catch (err) {
+        toast.error("An error occurred", { id: toastId });
+      }
     },
-    [sanitisedData, setSanitisedData, sanitiseInput]
+    [sanitisedData, setSanitisedData, sanitiseInput, images, specs, nasLocation]
   );
 
   const handleOnValueChange = useCallback((id: string, newValue: any) => {
@@ -123,12 +178,15 @@ export default function DataEntry() {
 
   return (
     <form
-      className="flex flex-col gap-4 max-w-[800px] w-full"
+      className="flex flex-col gap-4 max-w-[1000px] w-full"
       onSubmit={handleSubmit}
     >
       <div className="space-y-2">
         <Label htmlFor="images">Images:</Label>
-        <DataImage onValueChange={(e) => handleOnValueChange("images", e)} />
+        <DataImage
+          value={images}
+          onValueChange={(e) => handleOnValueChange("images", e)}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="specification">Specifications:</Label>

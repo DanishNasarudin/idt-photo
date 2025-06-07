@@ -13,7 +13,7 @@ type Props = {
 };
 
 export default function CustomRow({ data }: Props) {
-  const [expand, setExpand] = useState("item");
+  const [expand, setExpand] = useState("");
   const [_, copy] = useCopyToClipboard();
 
   return (
@@ -21,18 +21,18 @@ export default function CustomRow({ data }: Props) {
       <TableRow
         onClick={() => (expand === "" ? setExpand("item") : setExpand(""))}
       >
-        <TableCell>Test</TableCell>
-        <TableCell>Test</TableCell>
-        <TableCell>Test</TableCell>
-        <TableCell>Test</TableCell>
-        <TableCell>Test</TableCell>
-        <TableCell>Test</TableCell>
+        <TableCell>{data.created_at.toISOString()}</TableCell>
+        <TableCell>{data.invNumber}</TableCell>
+        <TableCell>{data.nasLocation}</TableCell>
+        <TableCell>{data.total}</TableCell>
+        <TableCell>{data.status}</TableCell>
+        <TableCell>actions</TableCell>
       </TableRow>
       <TableRow>
         <TableCell colSpan={6} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
-              <AccordionContent className="bg-red-500 p-2">
+              <AccordionContent className=" p-2">
                 <div
                   key={data.invNumber}
                   id={data.invNumber || "null"}

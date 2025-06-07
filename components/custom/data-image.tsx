@@ -1,5 +1,6 @@
 "use client";
 import { convertFileToWebP } from "@/lib/utils";
+import equal from "fast-deep-equal";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -7,17 +8,25 @@ import { Button } from "../ui/button";
 import TooltipWrapper from "./tooltip-wrapper";
 
 type Props = {
-  onValueChange?: (newValue: File[]) => void;
+  value?: PreviewFile[];
+  onValueChange?: (newValue: PreviewFile[]) => void;
 };
 
 export interface PreviewFile extends File {
   preview: string;
 }
 
-export default function DataImage({ onValueChange = () => {} }: Props) {
+export default function DataImage({
+  value = [],
+  onValueChange = () => {},
+}: Props) {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
-  const [previews, setPreviews] = useState<PreviewFile[]>([]);
+  const [previews, setPreviews] = useState<PreviewFile[]>(value || []);
   const [converting, setConverting] = useState(false);
+
+  useEffect(() => {
+    if (!equal(previews, value)) setPreviews(value);
+  }, [value]);
 
   const onDrop = useCallback(
     async (incomingFiles: File[]) => {

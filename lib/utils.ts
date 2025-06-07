@@ -7,47 +7,70 @@ export function cn(...inputs: ClassValue[]) {
 
 export async function convertFileToWebP(
   file: File,
-  quality: number = 0.8
+  {
+    maxSizeInBytes = 1 * 1024 * 1024, // 1 MB
+    initialQuality = 0.8,
+    minQuality = 0.05,
+    qualityStep = 0.05,
+    maxWidth = 1920,
+    maxHeight = 1080,
+  }: {
+    maxSizeInBytes?: number;
+    initialQuality?: number;
+    minQuality?: number;
+    qualityStep?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+  } = {}
 ): Promise<File> {
-  // Read the File into an HTMLImageElement
-  const dataURL = await new Promise<string>((resolve, reject) => {
+  // load image
+  const dataURL = await new Promise<string>((res, rej) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") resolve(reader.result);
-      else reject(new Error("Failed to read file as data URL"));
-    };
-    reader.onerror = () => reject(reader.error);
+    reader.onload = () =>
+      typeof reader.result === "string" ? res(reader.result) : rej();
+    reader.onerror = () => rej(reader.error);
     reader.readAsDataURL(file);
   });
-
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+  const img = await new Promise<HTMLImageElement>((res, rej) => {
     const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Failed to load image"));
+    image.onload = () => res(image);
+    image.onerror = () => rej();
     image.src = dataURL;
   });
 
-  // Draw onto a canvas
+  // compute resize scale
+  const scale = Math.min(
+    1,
+    maxWidth / img.naturalWidth,
+    maxHeight / img.naturalHeight
+  );
+  const width = Math.floor(img.naturalWidth * scale);
+  const height = Math.floor(img.naturalHeight * scale);
+
+  // draw to canvas
   const canvas = document.createElement("canvas");
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not get canvas context");
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(img, 0, 0, width, height);
 
-  // Export as WebP Blob
-  const webpBlob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("Canvas toBlob failed"));
-      },
-      "image/webp",
-      quality
+  // iteratively reduce quality until under maxSizeInBytes
+  let quality = initialQuality;
+  let blob: Blob | null = null;
+  do {
+    blob = await new Promise<Blob>((res, rej) =>
+      canvas.toBlob(
+        (b) => (b ? res(b) : rej(new Error("toBlob failed"))),
+        "image/webp",
+        quality
+      )
     );
-  });
+    if (blob.size <= maxSizeInBytes || quality <= minQuality) break;
+    quality = Math.max(minQuality, quality - qualityStep);
+  } while (true);
 
-  // Wrap Blob into a File with .webp extension
+  // wrap as File
   const newName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
-  return new File([webpBlob], newName, { type: "image/webp" });
+  return new File([blob], newName, { type: "image/webp" });
 }
