@@ -4,8 +4,56 @@ import { Prisma, results } from "@/db/generated/prisma";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function searchData() {
-  return prisma.results.findMany({});
+export type Pagination = {
+  lastVisiblePage: number;
+  hasNextPage: boolean;
+  currentPage: number;
+  items: {
+    count: number;
+    total: number;
+    perPage: number;
+  };
+};
+
+export async function searchData(
+  query?: string,
+  page: number = 1
+): Promise<{ data: results[]; pagination: Pagination }> {
+  const currentPage = page || 1;
+  const perPage = 10;
+  const skip = (currentPage - 1) * perPage;
+
+  const where: Prisma.resultsWhereInput = {};
+  if (query) {
+    where.originalContent = { contains: query };
+  }
+
+  const [total, data] = await Promise.all([
+    prisma.results.count({ where }),
+    prisma.results.findMany({
+      where,
+      skip,
+      take: perPage,
+      orderBy: { created_at: "desc" },
+    }),
+  ]);
+
+  const lastVisiblePage = Math.ceil(total / perPage);
+  const hasNextPage = currentPage < lastVisiblePage;
+
+  return {
+    data,
+    pagination: {
+      lastVisiblePage,
+      hasNextPage,
+      currentPage,
+      items: {
+        count: data.length,
+        total,
+        perPage,
+      },
+    },
+  };
 }
 
 export async function createData(

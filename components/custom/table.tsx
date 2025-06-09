@@ -14,7 +14,6 @@ import CustomRow from "./table-row";
 export default function TableDisplay({ data = [] }: { data?: results[] }) {
   const dataMemo = useMemo(() => data, [data]);
 
-  console.log(dataMemo);
   return (
     <Table className="max-w-[1000px] mx-auto table-fixed w-full">
       <TableHeader className="select-none">

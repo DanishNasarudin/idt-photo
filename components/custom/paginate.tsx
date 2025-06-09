@@ -1,0 +1,113 @@
+"use client";
+
+import { Pagination } from "@/services/results";
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+
+export default function Paginate({ data }: { data: Pagination }) {
+  const searchParams = useSearchParams();
+
+  const [value, setValue] = useState(
+    Number(searchParams.get("page")?.toString()) || data.currentPage || 1
+  );
+
+  const { replace } = useRouter();
+  const pathname = usePathname();
+
+  const handlePage = (term: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    setValue(term);
+    if (term) {
+      params.set("page", String(term));
+    } else {
+      params.delete("page");
+    }
+    replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  return (
+    <div className="flex gap-2 items-center justify-between max-w-[1000px] w-full text-sm">
+      <span className="text-nowrap text-foreground/50 hidden sm:block">
+        Items per page: {data.items.perPage}
+      </span>
+      <div className="flex gap-2 items-center">
+        <span className="text-foreground/50">
+          {(data.currentPage - 1) * data.items.perPage + 1} -{" "}
+          {Math.min(data.currentPage * data.items.perPage, data.items.total)} of{" "}
+          {data.items.total} | Page {data.currentPage} of {data.lastVisiblePage}
+        </span>
+        <Button
+          onClick={() => handlePage(1)}
+          disabled={data.currentPage === 1}
+          variant={"outline"}
+          size={"icon"}
+        >
+          <ChevronFirst />
+        </Button>
+        <Button
+          onClick={() => handlePage(data.currentPage - 1)}
+          disabled={data.currentPage === 1}
+          variant={"outline"}
+          size={"icon"}
+        >
+          <ChevronLeft />
+        </Button>
+        <Input
+          value={value}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.currentTarget.blur();
+              handlePage(
+                Number(e.currentTarget.value) > 0
+                  ? Number(e.currentTarget.value)
+                  : 1
+              );
+            }
+          }}
+          onBlur={(e) => {
+            console.log(
+              Number(searchParams.get("page")?.toString()),
+              Number(e.currentTarget.value),
+              value !== Number(e.currentTarget.value)
+            );
+            if (
+              Number(searchParams.get("page")?.toString()) !==
+              Number(e.currentTarget.value)
+            )
+              handlePage(
+                Number(e.currentTarget.value) > 0
+                  ? Number(e.currentTarget.value)
+                  : 1
+              );
+          }}
+          onChange={(e) => setValue(Number(e.target.value))}
+          className="w-9 h-9 p-0 justify-center items-center text-center"
+        />
+        <Button
+          onClick={() => handlePage(data.currentPage + 1)}
+          disabled={!data.hasNextPage}
+          variant={"outline"}
+          size={"icon"}
+        >
+          <ChevronRight />
+        </Button>
+        <Button
+          onClick={() => handlePage(data.lastVisiblePage)}
+          disabled={!data.hasNextPage}
+          variant={"outline"}
+          size={"icon"}
+        >
+          <ChevronLast />
+        </Button>
+      </div>
+    </div>
+  );
+}
