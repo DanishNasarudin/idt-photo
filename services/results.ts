@@ -31,3 +31,12 @@ export async function deleteData(id: number) {
 
   return response;
 }
+
+export async function updateData(id: number, data: Partial<results>) {
+  return prisma.results.update({
+    where: {
+      id,
+    },
+    data,
+  });
+}

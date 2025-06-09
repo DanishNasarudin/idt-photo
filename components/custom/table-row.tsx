@@ -1,6 +1,7 @@
 "use client";
 import { results } from "@/db/generated/prisma";
 import { cn, formatDate } from "@/lib/utils";
+import { updateData } from "@/services/results";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +21,14 @@ export default function CustomRow({ data }: Props) {
   const [expand, setExpand] = useState("");
   const [_, copy] = useCopyToClipboard();
 
+  const handleValueChange = async (newValue: string) => {
+    toast.promise(updateData(data.id, { status: newValue }), {
+      loading: "Updating data..",
+      success: "Updated!",
+      error: "Data update failed!",
+    });
+  };
+
   return (
     <>
       <TableRow
@@ -37,7 +46,10 @@ export default function CustomRow({ data }: Props) {
         </TableCell>
         <TableCell>{data.total}</TableCell>
         <TableCell className="py-0">
-          <CellDropdown value={data.status || ""} />
+          <CellDropdown
+            value={data.status || ""}
+            onValueChange={handleValueChange}
+          />
         </TableCell>
         <TableCell className="py-0">
           <CellActions id={data.id} />
