@@ -17,11 +17,12 @@ export type Pagination = {
 
 export async function searchData(
   query?: string,
-  page: number = 1
+  page: number = 1,
+  perPage?: number
 ): Promise<{ data: results[]; pagination: Pagination }> {
   const currentPage = page || 1;
-  const perPage = 10;
-  const skip = (currentPage - 1) * perPage;
+  const currentPerPage = perPage || 10;
+  const skip = (currentPage - 1) * currentPerPage;
 
   const where: Prisma.resultsWhereInput = {};
   if (query) {
@@ -33,12 +34,12 @@ export async function searchData(
     prisma.results.findMany({
       where,
       skip,
-      take: perPage,
+      take: currentPerPage,
       orderBy: { created_at: "desc" },
     }),
   ]);
 
-  const lastVisiblePage = Math.ceil(total / perPage);
+  const lastVisiblePage = Math.ceil(total / currentPerPage);
   const hasNextPage = currentPage < lastVisiblePage;
 
   return {
@@ -50,7 +51,7 @@ export async function searchData(
       items: {
         count: data.length,
         total,
-        perPage,
+        perPage: currentPerPage,
       },
     },
   };

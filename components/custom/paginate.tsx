@@ -6,17 +6,28 @@ import {
   ChevronLast,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
 
 export default function Paginate({ data }: { data: Pagination }) {
   const searchParams = useSearchParams();
 
-  const [value, setValue] = useState(
+  const [pageValue, setPageValue] = useState(
     Number(searchParams.get("page")?.toString()) || data.currentPage || 1
+  );
+  const [perPageValue, setPerPageValue] = useState(
+    Number(searchParams.get("perPage")?.toString()) || data.items.perPage || 1
   );
 
   const { replace } = useRouter();
@@ -24,7 +35,7 @@ export default function Paginate({ data }: { data: Pagination }) {
 
   const handlePage = (term: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    setValue(term);
+    setPageValue(term);
     if (term) {
       params.set("page", String(term));
     } else {
@@ -33,11 +44,37 @@ export default function Paginate({ data }: { data: Pagination }) {
     replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  const handlePerPage = (term: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    setPerPageValue(term);
+    if (term) {
+      params.set("perPage", String(term));
+    } else {
+      params.delete("perPage");
+    }
+    replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   return (
     <div className="flex gap-2 items-center justify-between max-w-[1000px] w-full text-sm">
-      <span className="text-nowrap text-foreground/50 hidden sm:block">
-        Items per page: {data.items.perPage}
-      </span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"outline"}>
+            {perPageValue} Rows <ChevronsUpDown />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuRadioGroup
+            defaultValue={"10"}
+            onValueChange={(e) => handlePerPage(Number(e))}
+          >
+            <DropdownMenuRadioItem value="10">10 Rows</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="20">20 Rows</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="50">50 Rows</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="100">100 Rows</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="flex gap-2 items-center">
         <span className="text-foreground/50">
           {(data.currentPage - 1) * data.items.perPage + 1} -{" "}
@@ -61,7 +98,7 @@ export default function Paginate({ data }: { data: Pagination }) {
           <ChevronLeft />
         </Button>
         <Input
-          value={value}
+          value={pageValue}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.currentTarget.blur();
@@ -76,7 +113,7 @@ export default function Paginate({ data }: { data: Pagination }) {
             console.log(
               Number(searchParams.get("page")?.toString()),
               Number(e.currentTarget.value),
-              value !== Number(e.currentTarget.value)
+              pageValue !== Number(e.currentTarget.value)
             );
             if (
               Number(searchParams.get("page")?.toString()) !==
@@ -88,7 +125,7 @@ export default function Paginate({ data }: { data: Pagination }) {
                   : 1
               );
           }}
-          onChange={(e) => setValue(Number(e.target.value))}
+          onChange={(e) => setPageValue(Number(e.target.value))}
           className="w-9 h-9 p-0 justify-center items-center text-center"
         />
         <Button
