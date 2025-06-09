@@ -1,12 +1,14 @@
 "use client";
 import { results } from "@/db/generated/prisma";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { Copy } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
 import { Button } from "../ui/button";
 import { TableCell, TableRow } from "../ui/table";
+import CellCopy from "./cell-copy";
 
 type Props = {
   data: results;
@@ -20,15 +22,22 @@ export default function CustomRow({ data }: Props) {
     <>
       <TableRow
         onClick={() => (expand === "" ? setExpand("item") : setExpand(""))}
+        className="cursor-pointer select-none"
       >
-        <TableCell>{data.created_at.toISOString()}</TableCell>
-        <TableCell>{data.invNumber}</TableCell>
-        <TableCell>{data.nasLocation}</TableCell>
+        <TableCell>
+          <CellCopy name="Date" value={formatDate(data.created_at) || ""} />
+        </TableCell>
+        <TableCell>
+          <CellCopy name="Invoice ID" value={data.invNumber || ""} />
+        </TableCell>
+        <TableCell>
+          <CellCopy name="NAS Location" value={data.nasLocation || ""} />
+        </TableCell>
         <TableCell>{data.total}</TableCell>
         <TableCell>{data.status}</TableCell>
         <TableCell>actions</TableCell>
       </TableRow>
-      <TableRow>
+      <TableRow className="border-0">
         <TableCell colSpan={6} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
@@ -63,8 +72,20 @@ export default function CustomRow({ data }: Props) {
                     </div>
                   </div>
                   <div className="border-border border-[1px] rounded-lg flex gap-8 p-4">
-                    <div className="flex w-full overflow-x-auto text-foreground/60 text-xs">
+                    <div className="flex w-full overflow-x-auto text-foreground/60 text-xs relative group">
                       <pre>{data.originalContent}</pre>
+                      <Button
+                        variant={"outline"}
+                        size={"icon"}
+                        className="absolute hidden group-hover:flex h-8 w-8 top-0 right-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copy(data.originalContent || "");
+                          toast.success(`Specs copied!`);
+                        }}
+                      >
+                        <Copy />
+                      </Button>
                     </div>
                     <div
                       className={cn(

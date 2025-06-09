@@ -16,13 +16,13 @@ export default function TableDisplay({ data = [] }: { data?: results[] }) {
 
   console.log(dataMemo);
   return (
-    <Table className="max-w-[1000px] mx-auto">
+    <Table className="max-w-[1000px] mx-auto table-fixed w-full">
       <TableHeader>
         <TableRow>
-          <TableHead>Date</TableHead>
-          <TableHead>Invoice ID</TableHead>
-          <TableHead>NAS Location</TableHead>
-          <TableHead>Total</TableHead>
+          <TableHead className="w-[120px]">Date</TableHead>
+          <TableHead className="w-[120px]">Invoice ID</TableHead>
+          <TableHead className="w-[35%]">NAS Location</TableHead>
+          <TableHead className="w-[120px]">Total</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
