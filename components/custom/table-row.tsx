@@ -3,7 +3,7 @@ import { results } from "@/db/generated/prisma";
 import { cn, formatDate } from "@/lib/utils";
 import { updateData } from "@/services/results";
 import { Copy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
@@ -15,9 +15,15 @@ import CellDropdown from "./cell-dropdown";
 
 type Props = {
   data: results;
+  isExpanded?: boolean;
+  onExpand?: (newValue: number) => void;
 };
 
-export default function CustomRow({ data }: Props) {
+export default function CustomRow({
+  data,
+  isExpanded = false,
+  onExpand = () => {},
+}: Props) {
   const [expand, setExpand] = useState("");
   const [_, copy] = useCopyToClipboard();
 
@@ -29,12 +35,27 @@ export default function CustomRow({ data }: Props) {
     });
   };
 
+  const handleExpand = () => {
+    if (expand === "") {
+      setExpand("item");
+      onExpand(data.id);
+    } else {
+      setExpand("");
+      onExpand(data.id);
+    }
+  };
+
+  useEffect(() => {
+    if (isExpanded) {
+      setExpand("item");
+    } else {
+      setExpand("");
+    }
+  }, [isExpanded]);
+
   return (
     <>
-      <TableRow
-        onClick={() => (expand === "" ? setExpand("item") : setExpand(""))}
-        className="cursor-pointer select-none"
-      >
+      <TableRow onClick={handleExpand} className="cursor-pointer select-none">
         <TableCell>
           <CellCopy name="Date" value={formatDate(data.created_at) || ""} />
         </TableCell>

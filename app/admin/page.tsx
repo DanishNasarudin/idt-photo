@@ -21,9 +21,8 @@ export default async function AdminPage({
       <div className="max-w-[1000px] space-y-2">
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
         <InputSearch />
-        <Paginate data={data.pagination} />
         <TableDisplay data={data.data} />
-        {data.data.length > 10 && <Paginate data={data.pagination} />}
+        <Paginate data={data.pagination} />
       </div>
       <div className="h-[200px]"></div>
     </div>
