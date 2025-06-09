@@ -24,10 +24,16 @@ export async function searchData(
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;
 
-  const where: Prisma.resultsWhereInput = {};
-  if (query) {
-    where.originalContent = { contains: query };
-  }
+  const where: Prisma.resultsWhereInput = query
+    ? {
+        OR: [
+          { invNumber: { contains: query } },
+          { originalContent: { contains: query } },
+          { total: { contains: query } },
+          { nasLocation: { contains: query } },
+        ],
+      }
+    : {};
 
   const [total, data] = await Promise.all([
     prisma.results.count({ where }),
