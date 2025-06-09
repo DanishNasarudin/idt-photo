@@ -89,3 +89,16 @@ export async function updateData(id: number, data: Partial<results>) {
     data,
   });
 }
+
+export async function updateManyData(
+  ids: number[],
+  data: Partial<results>
+): Promise<{ count: number }> {
+  const response = await prisma.results.updateMany({
+    where: { id: { in: ids } },
+    data,
+  });
+
+  revalidatePath("/admin");
+  return response;
+}

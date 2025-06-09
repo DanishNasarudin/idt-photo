@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import { TableCell, TableRow } from "../ui/table";
 import CellActions from "./cell-actions";
 import CellCopy from "./cell-copy";
@@ -17,14 +18,19 @@ type Props = {
   data: results;
   isExpanded?: boolean;
   onExpand?: (newValue: number) => void;
+  isSelected?: boolean;
+  onSelected?: (newValue: number, shiftKey: boolean) => void;
 };
 
 export default function CustomRow({
   data,
   isExpanded = false,
   onExpand = () => {},
+  isSelected = false,
+  onSelected = () => {},
 }: Props) {
   const [expand, setExpand] = useState("");
+  const [selected, setSelected] = useState(false);
   const [_, copy] = useCopyToClipboard();
 
   const handleValueChange = async (newValue: string) => {
@@ -53,9 +59,26 @@ export default function CustomRow({
     }
   }, [isExpanded]);
 
+  useEffect(() => {
+    if (isSelected) {
+      setSelected(true);
+    } else {
+      setSelected(false);
+    }
+  }, [isSelected]);
+
   return (
     <>
       <TableRow onClick={handleExpand} className="cursor-pointer select-none">
+        <TableCell>
+          <Checkbox
+            checked={selected}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation();
+              onSelected(data.id, e.shiftKey);
+            }}
+          />
+        </TableCell>
         <TableCell>
           <CellCopy name="Date" value={formatDate(data.created_at) || ""} />
         </TableCell>
@@ -77,7 +100,7 @@ export default function CustomRow({
         </TableCell>
       </TableRow>
       <TableRow className="border-0">
-        <TableCell colSpan={6} className="p-0">
+        <TableCell colSpan={7} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
               <AccordionContent className=" p-2">

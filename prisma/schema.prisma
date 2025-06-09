@@ -16,5 +16,5 @@ model results {
   nasLocation     String?  @db.VarChar(255)
   imagePath       String?  @db.VarChar(255)
   status          String?  @db.VarChar(50)
-  created_at      DateTime @default(now()) @db.Timestamp(0)
+  created_at      DateTime @default(now()) @db.DateTime(0)
 }
