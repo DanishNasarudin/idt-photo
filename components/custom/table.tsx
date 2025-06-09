@@ -17,7 +17,7 @@ export default function TableDisplay({ data = [] }: { data?: results[] }) {
   console.log(dataMemo);
   return (
     <Table className="max-w-[1000px] mx-auto table-fixed w-full">
-      <TableHeader>
+      <TableHeader className="select-none">
         <TableRow>
           <TableHead className="w-[120px]">Date</TableHead>
           <TableHead className="w-[120px]">Invoice ID</TableHead>

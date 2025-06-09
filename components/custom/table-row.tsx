@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
 import { Button } from "../ui/button";
 import { TableCell, TableRow } from "../ui/table";
 import CellCopy from "./cell-copy";
+import CellDropdown from "./cell-dropdown";
 
 type Props = {
   data: results;
@@ -34,7 +35,9 @@ export default function CustomRow({ data }: Props) {
           <CellCopy name="NAS Location" value={data.nasLocation || ""} />
         </TableCell>
         <TableCell>{data.total}</TableCell>
-        <TableCell>{data.status}</TableCell>
+        <TableCell className="py-0">
+          <CellDropdown value={data.status || ""} />
+        </TableCell>
         <TableCell>actions</TableCell>
       </TableRow>
       <TableRow className="border-0">
