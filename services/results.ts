@@ -19,3 +19,15 @@ export async function createData(
 
   return response;
 }
+
+export async function deleteData(id: number) {
+  const response = prisma.results.delete({
+    where: {
+      id,
+    },
+  });
+
+  revalidatePath("/admin");
+
+  return response;
+}

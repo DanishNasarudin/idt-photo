@@ -23,8 +23,8 @@ export default function TableDisplay({ data = [] }: { data?: results[] }) {
           <TableHead className="w-[120px]">Invoice ID</TableHead>
           <TableHead className="w-[35%]">NAS Location</TableHead>
           <TableHead className="w-[120px]">Total</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead className="w-[120px]">Status</TableHead>
+          <TableHead className="text-center w-[120px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -8,6 +8,7 @@ import { useCopyToClipboard } from "usehooks-ts";
 import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
 import { Button } from "../ui/button";
 import { TableCell, TableRow } from "../ui/table";
+import CellActions from "./cell-actions";
 import CellCopy from "./cell-copy";
 import CellDropdown from "./cell-dropdown";
 
@@ -38,7 +39,9 @@ export default function CustomRow({ data }: Props) {
         <TableCell className="py-0">
           <CellDropdown value={data.status || ""} />
         </TableCell>
-        <TableCell>actions</TableCell>
+        <TableCell className="py-0">
+          <CellActions id={data.id} />
+        </TableCell>
       </TableRow>
       <TableRow className="border-0">
         <TableCell colSpan={6} className="p-0">

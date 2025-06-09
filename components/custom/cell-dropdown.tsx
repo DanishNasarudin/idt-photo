@@ -37,7 +37,7 @@ export default function CellDropdown({
       <DropdownMenuTrigger asChild>
         <div
           className={cn(
-            "w-full h-full py-1 px-2 border-border border-[1px] rounded-md",
+            "w-full h-full py-0.5 px-2 border-border border-[1px] rounded-md",
             defaultColor[selected]
           )}
         >
