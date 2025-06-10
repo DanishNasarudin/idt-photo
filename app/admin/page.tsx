@@ -30,7 +30,7 @@ export default async function AdminPage({
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
         <CarouselDisplay data={data.data} />
         <InputSearch />
-        <TableDisplay data={data.data} selectedRow={currentSelected} />
+        <TableDisplay data={data.data} selectedRow={currentSelected} isAdmin />
         <Paginate data={data.pagination} />
       </div>
       <div className="h-[200px]"></div>
