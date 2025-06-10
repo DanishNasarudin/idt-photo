@@ -23,7 +23,7 @@ export default async function AdminPage({
   const data = await searchData(query, currentPage, currentPerPage);
 
   return (
-    <div className="p-4 flex flex-col gap-4 items-center">
+    <div className="p-4 pt-8 flex flex-col gap-4 items-center">
       <h1 className="font-bold text-lg">Insert PC Photo</h1>
       <DataEntry />
       <div className="max-w-[1000px] space-y-2">
