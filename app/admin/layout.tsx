@@ -1,3 +1,4 @@
+import Footer from "@/components/custom/footer";
 import NavbarBackend from "@/components/custom/navbar-backend";
 
 export default function AdminLayout({
@@ -9,6 +10,7 @@ export default function AdminLayout({
     <div className="flex flex-col">
       <NavbarBackend />
       {children}
+      <Footer />
     </div>
   );
 }

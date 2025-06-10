@@ -218,7 +218,7 @@ export default function DataEntry() {
             Confirm
           </Button>
         ) : (
-          <Button type="submit" className="max-w-max">
+          <Button type="submit" className="max-w-max text-white">
             {sanitisedData.length === 0 ? "Submit" : "Revalidate"}
           </Button>
         )}

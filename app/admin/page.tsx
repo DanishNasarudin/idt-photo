@@ -26,7 +26,7 @@ export default async function AdminPage({
     <div className="p-4 pt-8 flex flex-col gap-4 items-center">
       <h1 className="font-bold text-lg">Insert PC Photo</h1>
       <DataEntry />
-      <div className="max-w-[1000px] space-y-2">
+      <div className="max-w-[1000px] space-y-2 border-border border-t-[1px]">
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
         <CarouselDisplay data={data.data} />
         <InputSearch />

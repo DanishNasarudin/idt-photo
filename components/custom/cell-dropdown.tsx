@@ -11,9 +11,12 @@ import {
 export type Status = "Ready" | "Scheduled" | "Posted";
 
 export const defaultColor: Record<Status, string> = {
-  Ready: "bg-zinc-700",
-  Scheduled: "bg-purple-900",
-  Posted: "bg-green-900",
+  Ready:
+    "bg-zinc-500 dark:bg-zinc-700 hover:dark:!bg-zinc-500 hover:!bg-zinc-400 !text-white",
+  Scheduled:
+    "bg-purple-500 dark:bg-purple-900 hover:dark:!bg-purple-700 hover:!bg-purple-400 !text-white",
+  Posted:
+    "bg-green-500 dark:bg-green-900 hover:dark:!bg-green-700 hover:!bg-green-400 !text-white",
 };
 
 type Props = {
@@ -58,21 +61,30 @@ export default function CellDropdown({
           <DropdownMenuRadioItem
             value="Ready"
             indicator={false}
-            className="border-border border-[1px] bg-zinc-700  mb-1.5 cursor-pointer"
+            className={cn(
+              "border-border border-[1px]  mb-1.5 cursor-pointer",
+              defaultColor["Ready"]
+            )}
           >
             Ready
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem
             value="Scheduled"
             indicator={false}
-            className="border-border border-[1px] bg-purple-900 hover:!bg-purple-700 mb-1.5 cursor-pointer"
+            className={cn(
+              "border-border border-[1px] mb-1.5 cursor-pointer",
+              defaultColor["Scheduled"]
+            )}
           >
             Scheduled
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem
             value="Posted"
             indicator={false}
-            className="border-border border-[1px] bg-green-900 hover:!bg-green-700 cursor-pointer"
+            className={cn(
+              "border-border border-[1px] bg-green-900 hover:!bg-green-700 cursor-pointer",
+              defaultColor["Posted"]
+            )}
           >
             Posted
           </DropdownMenuRadioItem>
