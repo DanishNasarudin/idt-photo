@@ -21,9 +21,11 @@ import CustomRow from "./table-row";
 export default function TableDisplay({
   data = [],
   selectedRow = null,
+  isAdmin = false,
 }: {
   data?: results[];
   selectedRow?: number | null;
+  isAdmin?: boolean;
 }) {
   const dataMemo = useMemo(() => data, [data]);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
@@ -136,7 +138,9 @@ export default function TableDisplay({
             <TableHead className="w-[35%]">NAS Location</TableHead>
             <TableHead className="w-[120px]">Total</TableHead>
             <TableHead className="w-[120px]">Status</TableHead>
-            <TableHead className="text-center w-[120px]">Actions</TableHead>
+            {isAdmin && (
+              <TableHead className="text-center w-[120px]">Actions</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -150,12 +154,13 @@ export default function TableDisplay({
                   onExpand={handleExpand}
                   isSelected={selectedRows.includes(item.id)}
                   onSelected={handleSelected}
+                  isAdmin={isAdmin}
                 />
               );
             })}
           {dataMemo.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8">
+              <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8">
                 No Data.
               </TableCell>
             </TableRow>

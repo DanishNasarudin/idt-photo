@@ -49,7 +49,7 @@ export default function InputSearch() {
         }}
         value={value}
         className="text-base"
-        placeholder="Search pc photos"
+        placeholder="Search pc photo by invoice, specs, total, NAS location.."
       />
       {isLoading && (
         <div className="absolute top-[50%] translate-y-[-50%] right-8">

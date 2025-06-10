@@ -20,6 +20,7 @@ type Props = {
   onExpand?: (newValue: number) => void;
   isSelected?: boolean;
   onSelected?: (newValue: number, shiftKey: boolean) => void;
+  isAdmin?: boolean;
 };
 
 export default function CustomRow({
@@ -28,6 +29,7 @@ export default function CustomRow({
   onExpand = () => {},
   isSelected = false,
   onSelected = () => {},
+  isAdmin = false,
 }: Props) {
   const [expand, setExpand] = useState("");
   const [selected, setSelected] = useState(false);
@@ -93,18 +95,21 @@ export default function CustomRow({
           <CellCopy name="NAS Location" value={data.nasLocation || ""} />
         </TableCell>
         <TableCell>{data.total}</TableCell>
-        <TableCell className="py-0">
+        <TableCell className={cn("py-0")}>
           <CellDropdown
             value={data.status || ""}
             onValueChange={handleValueChange}
+            className={cn(!isAdmin && "pointer-events-none")}
           />
         </TableCell>
-        <TableCell className="py-0">
-          <CellActions id={data.id} />
-        </TableCell>
+        {isAdmin && (
+          <TableCell className="py-0">
+            <CellActions id={data.id} />
+          </TableCell>
+        )}
       </TableRow>
       <TableRow className="border-0">
-        <TableCell colSpan={7} className="p-0">
+        <TableCell colSpan={isAdmin ? 7 : 6} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
               <AccordionContent className=" p-2">

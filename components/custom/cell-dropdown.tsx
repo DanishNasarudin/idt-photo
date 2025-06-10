@@ -19,11 +19,13 @@ export const defaultColor: Record<Status, string> = {
 type Props = {
   value?: string;
   onValueChange?: (newValue: string) => void;
+  className?: string;
 };
 
 export default function CellDropdown({
   value = "",
   onValueChange = () => {},
+  className,
 }: Props) {
   const [selected, setSelected] = useState<Status>((value as any) || "");
 
@@ -44,7 +46,8 @@ export default function CellDropdown({
         <div
           className={cn(
             "w-full h-full py-0.5 px-2 border-border border-[1px] rounded-md",
-            defaultColor[selected]
+            defaultColor[selected],
+            className
           )}
         >
           {selected}
