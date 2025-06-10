@@ -2,7 +2,8 @@
 import { results } from "@/db/generated/prisma";
 import { updateManyData } from "@/services/results";
 import { X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -17,11 +18,21 @@ import {
 import StatusDropdown from "./status-dropdown";
 import CustomRow from "./table-row";
 
-export default function TableDisplay({ data = [] }: { data?: results[] }) {
+export default function TableDisplay({
+  data = [],
+  selectedRow = null,
+}: {
+  data?: results[];
+  selectedRow?: number | null;
+}) {
   const dataMemo = useMemo(() => data, [data]);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [lastIndex, setLastIndex] = useState<number | null>(null);
+
+  const { replace } = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handleExpand = (id: number) => {
     setExpandedRows((prev) =>
@@ -32,6 +43,12 @@ export default function TableDisplay({ data = [] }: { data?: results[] }) {
   const handleExpandAll = () => {
     if (expandedRows.length > 0) {
       setExpandedRows([]);
+
+      const params = new URLSearchParams(searchParams.toString());
+
+      replace(`${pathname}?${params.toString()}`, {
+        scroll: false,
+      });
       return;
     }
     setExpandedRows(dataMemo.map((item) => item.id));
@@ -72,6 +89,23 @@ export default function TableDisplay({ data = [] }: { data?: results[] }) {
     });
   };
 
+  useEffect(() => {
+    if (!selectedRow) return;
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.delete("select");
+    replace(`${pathname}?${params.toString()}#${selectedRow}`, {
+      scroll: false,
+    });
+
+    const element = document.getElementById(selectedRow.toString());
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    setExpandedRows([selectedRow]);
+  }, [selectedRow]);
+
   return (
     <>
       <div className="w-full flex justify-between">
@@ -90,7 +124,7 @@ export default function TableDisplay({ data = [] }: { data?: results[] }) {
       </div>
       <Table className="max-w-[1000px] mx-auto table-fixed w-full">
         <TableHeader className="select-none">
-          <TableRow>
+          <TableRow className="[&>th]:text-foreground/60">
             <TableHead className="w-[50px]">
               <Checkbox
                 checked={selectedRows.length === data.length}

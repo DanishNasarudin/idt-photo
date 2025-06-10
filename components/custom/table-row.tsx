@@ -69,7 +69,11 @@ export default function CustomRow({
 
   return (
     <>
-      <TableRow onClick={handleExpand} className="cursor-pointer select-none">
+      <TableRow
+        id={`${data.id}`}
+        onClick={handleExpand}
+        className="cursor-pointer select-none"
+      >
         <TableCell>
           <Checkbox
             checked={selected}
