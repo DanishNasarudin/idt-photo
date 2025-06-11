@@ -13,12 +13,18 @@ export async function POST(request: NextRequest) {
   };
 
   if (!query) {
-    return NextResponse.json({ results: [] }, { status: 201 });
+    return NextResponse.json({ images: [] }, { status: 201 });
   }
   const results = await searchDataPublic(query);
 
   return NextResponse.json(
-    { results: results.data.map((item) => item.imagePath) || [] },
+    {
+      images:
+        results.data.map((item) => ({
+          path: item.imagePath,
+          invoice: item.invNumber,
+        })) || [],
+    },
     { status: 201 }
   );
 }
