@@ -24,14 +24,18 @@ export async function searchData(
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;
 
-  const where: Prisma.resultsWhereInput = query
+  const searchWords = query?.split(/\s+/).filter(Boolean) || [];
+
+  const where: Prisma.resultsWhereInput = searchWords.length
     ? {
-        OR: [
-          { invNumber: { contains: query } },
-          { originalContent: { contains: query } },
-          { total: { contains: query } },
-          { nasLocation: { contains: query } },
-        ],
+        AND: searchWords.map((word) => ({
+          OR: [
+            { invNumber: { contains: word } },
+            { originalContent: { contains: word } },
+            { total: { contains: word } },
+            { nasLocation: { contains: word } },
+          ],
+        })),
       }
     : {};
 
@@ -127,13 +131,17 @@ export async function searchDataPublic(
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;
 
-  const where: Prisma.resultsWhereInput = query
+  const searchWords = query?.split(/\s+/).filter(Boolean) || [];
+
+  const where: Prisma.resultsWhereInput = searchWords.length
     ? {
-        OR: [
-          { gpu: { contains: query } },
-          { case: { contains: query } },
-          { cooler: { contains: query } },
-        ],
+        AND: searchWords.map((word) => ({
+          OR: [
+            { gpu: { contains: word } },
+            { case: { contains: word } },
+            { cooler: { contains: word } },
+          ],
+        })),
       }
     : {};
 

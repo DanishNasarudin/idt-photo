@@ -1,3 +1,5 @@
+---
 deployment:
   tasks:
+    - export DEPLOYPATH=/home/idealth/public_html/
     - npm run delbuild
