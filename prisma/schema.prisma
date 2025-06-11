@@ -10,12 +10,25 @@ datasource db {
 }
 
 model results {
-  id              Int      @id @default(autoincrement())
-  invNumber       String?  @db.VarChar(255)
-  total           String?  @db.VarChar(255)
-  originalContent String?  @db.Text
-  nasLocation     String?  @db.VarChar(255)
-  imagePath       String?  @db.VarChar(255)
-  status          String?  @db.VarChar(50)
-  created_at      DateTime @default(now()) @db.DateTime(0)
+  id        Int     @id @default(autoincrement())
+  invNumber String? @db.VarChar(255)
+  total     String? @db.VarChar(255)
+
+  originalContent String? @db.Text
+  cpu             String? @db.VarChar(255)
+  gpu             String? @db.VarChar(255)
+  ram             String? @db.VarChar(255)
+  cooler          String? @db.VarChar(255)
+  mobo            String? @db.VarChar(255)
+  case            String? @db.VarChar(255)
+  psu             String? @db.VarChar(255)
+  ssd             String? @db.Text
+  accessories     String? @db.Text
+  fans            String? @db.Text
+
+  nasLocation String? @db.VarChar(255)
+  imagePath   String? @db.VarChar(255)
+  status      String? @db.VarChar(50)
+
+  created_at DateTime @default(now()) @db.DateTime(0)
 }
