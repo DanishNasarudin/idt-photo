@@ -117,3 +117,50 @@ export async function checkDuplicates(
     select: { invNumber: true },
   });
 }
+
+export async function searchDataPublic(
+  query?: string,
+  page: number = 1,
+  perPage: number = 10
+): Promise<{ data: results[]; pagination: Pagination }> {
+  const currentPage = page || 1;
+  const currentPerPage = perPage || 10;
+  const skip = (currentPage - 1) * currentPerPage;
+
+  const where: Prisma.resultsWhereInput = query
+    ? {
+        OR: [
+          { gpu: { contains: query } },
+          { case: { contains: query } },
+          { cooler: { contains: query } },
+        ],
+      }
+    : {};
+
+  const [total, data] = await Promise.all([
+    prisma.results.count({ where }),
+    prisma.results.findMany({
+      where,
+      skip,
+      take: currentPerPage,
+      orderBy: { created_at: "desc" },
+    }),
+  ]);
+
+  const lastVisiblePage = Math.ceil(total / currentPerPage);
+  const hasNextPage = currentPage < lastVisiblePage;
+
+  return {
+    data,
+    pagination: {
+      lastVisiblePage,
+      hasNextPage,
+      currentPage,
+      items: {
+        count: data.length,
+        total,
+        perPage: currentPerPage,
+      },
+    },
+  };
+}
