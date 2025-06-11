@@ -33,7 +33,7 @@ export default function CarouselDisplay({ data }: { data: results[] }) {
         {data.map((item) => (
           <CarouselItem
             key={item.id}
-            className="basis-1/3 "
+            className="sm:basis-1/3"
             onClick={() => handleSelect(item.id)}
           >
             <img

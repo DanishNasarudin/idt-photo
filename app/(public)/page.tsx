@@ -23,7 +23,7 @@ export default async function Home({
 
   return (
     <div className="p-4 flex flex-col gap-4 items-center flex-1">
-      <div className="max-w-[1000px] space-y-2">
+      <div className="max-w-[1000px] space-y-2 w-full">
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
         <CarouselDisplay data={data.data} />
         <InputSearch />

@@ -126,16 +126,16 @@ export default function TableDisplay({
       </div>
       <Table className="max-w-[1000px] mx-auto table-fixed w-full">
         <TableHeader className="select-none">
-          <TableRow className="[&>th]:text-foreground/60">
+          <TableRow className="[&>th]:text-foreground/60 [&>th]:overflow-hidden">
             <TableHead className="w-[50px]">
               <Checkbox
-                checked={selectedRows.length === data.length}
+                checked={selectedRows.length === data.length && data.length > 0}
                 onCheckedChange={handleSelectAll}
               />
             </TableHead>
             <TableHead className="w-[120px]">Date</TableHead>
             <TableHead className="w-[120px]">Invoice ID</TableHead>
-            <TableHead className="w-[35%]">NAS Location</TableHead>
+            {isAdmin && <TableHead className="w-[35%]">NAS Location</TableHead>}
             <TableHead className="w-[120px]">Total</TableHead>
             <TableHead className="w-[120px]">Status</TableHead>
             {isAdmin && (
@@ -160,7 +160,7 @@ export default function TableDisplay({
             })}
           {dataMemo.length === 0 && (
             <TableRow>
-              <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8">
+              <TableCell colSpan={isAdmin ? 7 : 5} className="text-center py-8">
                 No Data.
               </TableCell>
             </TableRow>

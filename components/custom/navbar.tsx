@@ -81,7 +81,12 @@ const menuList: MenuList[] = [
     ],
   },
   {
-    title: "Special Offer ",
+    title: "Customize Your Own",
+    href: "https://build.idealtech.com.my",
+    target: true,
+  },
+  {
+    title: "Special Offer",
     href: "javascript:void(0)",
     target: true,
     dropdown: [
@@ -310,7 +315,7 @@ function Navbar() {
                                 <NavigationMenuLink
                                   className={cn(
                                     navigationMenuTriggerStyle(),
-                                    "hover:accent/50 w-full justify-start bg-transparent px-0"
+                                    "hover:accent/50 w-full items-start bg-transparent"
                                   )}
                                 >
                                   {main.title}
@@ -331,7 +336,7 @@ function Navbar() {
                                 value={String(idx)}
                                 className="border-b-0 data-[state=open]:border-b"
                               >
-                                <AccordionTrigger className="py-2">
+                                <AccordionTrigger className="py-2 px-4">
                                   {main.title}
                                 </AccordionTrigger>
                                 <AccordionContent className="mt-2 flex flex-col gap-2">
@@ -343,7 +348,7 @@ function Navbar() {
                                       target={
                                         drop.target ? "_blank" : undefined
                                       }
-                                      className="flex items-center"
+                                      className="flex items-start px-4"
                                     ></ListItem>
                                   ))}
                                 </AccordionContent>

@@ -74,7 +74,7 @@ export default function CustomRow({
       <TableRow
         id={`${data.id}`}
         onClick={handleExpand}
-        className="cursor-pointer select-none"
+        className="cursor-pointer select-none [&>td]:overflow-hidden"
       >
         <TableCell>
           <Checkbox
@@ -91,9 +91,11 @@ export default function CustomRow({
         <TableCell>
           <CellCopy name="Invoice ID" value={data.invNumber || ""} />
         </TableCell>
-        <TableCell>
-          <CellCopy name="NAS Location" value={data.nasLocation || ""} />
-        </TableCell>
+        {isAdmin && (
+          <TableCell>
+            <CellCopy name="NAS Location" value={data.nasLocation || ""} />
+          </TableCell>
+        )}
         <TableCell>{data.total}</TableCell>
         <TableCell className={cn("py-0")}>
           <CellDropdown
@@ -109,14 +111,14 @@ export default function CustomRow({
         )}
       </TableRow>
       <TableRow className="border-0">
-        <TableCell colSpan={isAdmin ? 7 : 6} className="p-0">
+        <TableCell colSpan={isAdmin ? 7 : 5} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
-              <AccordionContent className=" p-2">
+              <AccordionContent className="p-2">
                 <div
                   key={data.invNumber}
                   id={data.invNumber || "null"}
-                  className="flex flex-col gap-2"
+                  className="hidden sm:flex flex-col gap-2"
                 >
                   <div className="flex flex-col gap-0">
                     <div className="flex gap-2 items-center">
@@ -143,6 +145,72 @@ export default function CustomRow({
                     </div>
                   </div>
                   <div className="border-border border-[1px] rounded-lg flex gap-8 p-4">
+                    <div className="flex w-full overflow-x-auto text-foreground/60 text-xs relative group">
+                      <pre>{data.originalContent}</pre>
+                      <Button
+                        variant={"outline"}
+                        size={"icon"}
+                        className="absolute hidden group-hover:flex h-8 w-8 top-0 right-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copy(data.originalContent || "");
+                          toast.success(`Specs copied!`);
+                        }}
+                      >
+                        <Copy />
+                      </Button>
+                    </div>
+                    <div
+                      className={cn(
+                        "flex w-full justify-center items-center rounded-lg",
+                        !data.imagePath && "bg-destructive/5"
+                      )}
+                    >
+                      {data.imagePath ? (
+                        <img
+                          src={data.imagePath}
+                          alt={data.imagePath}
+                          className="w-full h-auto object-cover rounded-lg"
+                          draggable={false}
+                        />
+                      ) : (
+                        <p className="text-destructive text-xs">
+                          Missing Image
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  key={data.invNumber}
+                  id={data.invNumber || "null"}
+                  className="flex sm:hidden flex-col gap-2"
+                >
+                  <div className="flex flex-col gap-0">
+                    <div className="flex gap-2 items-center">
+                      <p className="text-primary font-bold">{data.invNumber}</p>
+                      <Button
+                        variant={"ghost"}
+                        size={"icon"}
+                        onClick={() => copy(data.invNumber || "null")}
+                        className="w-8 h-8 text-foreground/60"
+                      >
+                        <Copy />
+                      </Button>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <p>{data.nasLocation}</p>
+                      <Button
+                        variant={"ghost"}
+                        size={"icon"}
+                        onClick={() => copy(data.nasLocation || "null")}
+                        className="w-8 h-8 text-foreground/60"
+                      >
+                        <Copy />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="border-border border-[1px] rounded-lg flex flex-col-reverse gap-8 p-4">
                     <div className="flex w-full overflow-x-auto text-foreground/60 text-xs relative group">
                       <pre>{data.originalContent}</pre>
                       <Button
