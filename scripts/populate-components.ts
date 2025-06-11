@@ -28,7 +28,7 @@ const keyMap: Record<string, keyof ComponentFields> = {
   FAN: "fans",
 };
 
-function parseComponents(content: string): ComponentFields {
+export function parseComponents(content: string): ComponentFields {
   const result: ComponentFields = {};
 
   for (const line of content.split(/\r?\n/)) {

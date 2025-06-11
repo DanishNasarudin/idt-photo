@@ -1,4 +1,5 @@
 "use client";
+import { parseComponents } from "@/scripts/populate-components";
 import { checkDuplicates } from "@/services/results";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -62,8 +63,6 @@ export default function DataEntry() {
         duplicateIdsInDb
           .map((i) => (i.invNumber === null ? "" : i.invNumber))
           .filter((i) => i === invoiceNumber).length > 0;
-
-      console.log(existingInvoicesInDb);
 
       let errorMessage = "";
 
@@ -153,6 +152,7 @@ export default function DataEntry() {
           nasLocation: item.nasLocation,
           imagePath: item.image ? nameToPath[item.image.name] : null,
           status: "Ready",
+          ...parseComponents(item.originalContent),
         }));
 
         const res = await fetch("/api/insert", {
@@ -175,19 +175,9 @@ export default function DataEntry() {
   );
 
   const handleOnValueChange = useCallback((id: string, newValue: any) => {
-    switch (id) {
-      case "images":
-        setImages(newValue);
-        break;
-      case "specification":
-        setSpecs(newValue);
-        break;
-      case "nas-location":
-        setNasLocation(newValue);
-        break;
-      default:
-        break;
-    }
+    if (id === "images") setImages(newValue);
+    if (id === "specification") setSpecs(newValue);
+    if (id === "nas-location") setNasLocation(newValue);
   }, []);
 
   return (

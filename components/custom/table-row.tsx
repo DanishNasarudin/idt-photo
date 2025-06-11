@@ -114,12 +114,12 @@ export default function CustomRow({
         <TableCell colSpan={isAdmin ? 7 : 5} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
-              <AccordionContent className="p-2">
-                <div
-                  key={data.invNumber}
-                  id={data.invNumber || "null"}
-                  className="hidden sm:flex flex-col gap-2"
-                >
+              <AccordionContent
+                className="p-2"
+                key={data.invNumber}
+                id={data.invNumber || "null"}
+              >
+                <div className="hidden sm:flex flex-col gap-2">
                   <div className="flex flex-col gap-0">
                     <div className="flex gap-2 items-center">
                       <p className="text-primary font-bold">{data.invNumber}</p>
@@ -181,11 +181,7 @@ export default function CustomRow({
                     </div>
                   </div>
                 </div>
-                <div
-                  key={data.invNumber}
-                  id={data.invNumber || "null"}
-                  className="flex sm:hidden flex-col gap-2"
-                >
+                <div className="flex sm:hidden flex-col gap-2">
                   <div className="flex flex-col gap-0">
                     <div className="flex gap-2 items-center">
                       <p className="text-primary font-bold">{data.invNumber}</p>
