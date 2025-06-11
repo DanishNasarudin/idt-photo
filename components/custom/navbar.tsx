@@ -198,7 +198,7 @@ function Navbar() {
     >
       <div
         className={`
-    top-0 z-[100] border-b-[1px] border-[#323232] bg-background/80 transition-all 
+    top-0 z-[100] border-b-[1px] border-border bg-background/80 transition-all 
     before:absolute before:top-0 before:-z-10 before:h-full before:w-full before:backdrop-blur-md before:content-['']
     
     `}
@@ -217,13 +217,9 @@ function Navbar() {
               className="flex justify-between"
               style={{ width: "100%" }}
             >
-              <a href="/">
-                <img
-                  src="https://idealtech.com.my/wp-content/uploads/2023/03/IDT_LOGO-150x150.png"
-                  alt="logo"
-                  className="z-10 w-10"
-                />
-              </a>
+              <Link href={"/"}>
+                <LogoIcon size={40} className="text-foreground" />
+              </Link>
               {menuList.map((main, idx) => {
                 if (main.dropdown === undefined) {
                   return (
@@ -281,13 +277,9 @@ function Navbar() {
             </NavigationMenuList>
           </NavigationMenu>
           <div className="z-[100] flex justify-between px-4 py-4 sm:hidden">
-            <a href="/">
-              <img
-                src="https://idealtech.com.my/wp-content/uploads/2023/03/IDT_LOGO-150x150.png"
-                alt="logo"
-                className="z-10 w-10"
-              />
-            </a>
+            <Link href={"/"}>
+              <LogoIcon size={40} className="text-foreground" />
+            </Link>
             <Sheet>
               <SheetTrigger asChild>
                 <Button className="bg-transparent px-2 text-white">
