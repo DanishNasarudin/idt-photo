@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const filename = (fileItem as File).name;
 
   // Ensure upload directory exists
-  const uploadDir = path.join(process.cwd(), "public", "upload");
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
   await fs.promises.mkdir(uploadDir, { recursive: true });
 
   // Write file to disk
@@ -40,5 +40,7 @@ export async function POST(request: Request) {
   await fs.promises.writeFile(filePath, buffer);
 
   // Return the public URL
-  return NextResponse.json({ path: `/upload/${encodeURIComponent(filename)}` });
+  return NextResponse.json({
+    path: `/uploads/${encodeURIComponent(filename)}`,
+  });
 }
