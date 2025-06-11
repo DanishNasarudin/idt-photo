@@ -1,4 +1,5 @@
 "use client";
+import { checkDuplicates } from "@/services/results";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -23,12 +24,14 @@ export default function DataEntry() {
   const [nasLocation, setNasLocation] = useState("");
   const [sanitisedData, setSanitisedData] = useState<SanitiseInputProps[]>([]);
 
-  const sanitiseInput = (): SanitiseInputProps[] => {
+  const sanitiseInput = async (): Promise<SanitiseInputProps[]> => {
     const specsRegex = /INV#:\s*(\S*)[\s\S]*?Total\s*:\s*(RM\s?[0-9,]+)/gi;
     const invoices = Array.from(specs.matchAll(specsRegex));
     const filteredInvoices = invoices
       .map((item) => item[1].replace(/-/g, ""))
       .filter((item) => item);
+
+    const duplicateIdsInDb = await checkDuplicates(filteredInvoices);
 
     const requiredSpecs = ["INV#", "CPU", "GPU", "CASE", "MOBO", "RAM", "PSU"];
 
@@ -55,10 +58,21 @@ export default function DataEntry() {
       const existingInvoices =
         filteredInvoices.filter((i) => i === invoiceNumber).length > 1;
 
+      const existingInvoicesInDb =
+        duplicateIdsInDb
+          .map((i) => (i.invNumber === null ? "" : i.invNumber))
+          .filter((i) => i === invoiceNumber).length > 0;
+
+      console.log(existingInvoicesInDb);
+
       let errorMessage = "";
 
       if (!invoiceNumber) {
         errorMessage += `Missing or empty INV#, ensure that the invoice number is provided.\n`;
+      }
+
+      if (existingInvoicesInDb) {
+        errorMessage += `INV# ${invoiceNumber} already exists in database.\n`;
       }
 
       if (existingInvoices) {
@@ -112,7 +126,7 @@ export default function DataEntry() {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      const sanitised = sanitiseInput();
+      const sanitised = await sanitiseInput();
       setSanitisedData(sanitised);
       if (
         sanitised.some((item) => item.errorMessage !== null) ||

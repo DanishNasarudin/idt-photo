@@ -108,3 +108,12 @@ export async function updateManyData(
   revalidatePath("/admin");
   return response;
 }
+
+export async function checkDuplicates(
+  invoiceNum: string[]
+): Promise<{ invNumber: string | null }[]> {
+  return prisma.results.findMany({
+    where: { invNumber: { in: invoiceNum } },
+    select: { invNumber: true },
+  });
+}
