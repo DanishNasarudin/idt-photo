@@ -137,6 +137,7 @@ export async function searchDataPublic(
     ? {
         AND: searchWords.map((word) => ({
           OR: [
+            { originalContent: { contains: word } },
             { gpu: { contains: word } },
             { case: { contains: word } },
             { cooler: { contains: word } },
