@@ -134,7 +134,7 @@ export default function TableDisplay({
               />
             </TableHead>
             <TableHead className="w-[120px]">Date</TableHead>
-            <TableHead className="w-[120px]">Invoice ID</TableHead>
+            {isAdmin && <TableHead className="w-[120px]">Invoice ID</TableHead>}
             {isAdmin && <TableHead className="w-[35%]">NAS Location</TableHead>}
             <TableHead className="w-[120px]">Total</TableHead>
             <TableHead className="w-[120px]">Status</TableHead>
@@ -160,7 +160,7 @@ export default function TableDisplay({
             })}
           {dataMemo.length === 0 && (
             <TableRow>
-              <TableCell colSpan={isAdmin ? 7 : 5} className="text-center py-8">
+              <TableCell colSpan={isAdmin ? 7 : 4} className="text-center py-8">
                 No Data.
               </TableCell>
             </TableRow>

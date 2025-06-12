@@ -20,7 +20,7 @@ export default async function AdminPage({
   const currentPerPage = Number((await searchParams)?.perPage) || 10;
   const currentSelected = Number((await searchParams)?.select) || null;
 
-  const data = await searchData(query, currentPage, currentPerPage);
+  const data = await searchData(query, currentPage, currentPerPage, true);
 
   return (
     <div className="p-4 pt-8 flex flex-col gap-4 items-center">

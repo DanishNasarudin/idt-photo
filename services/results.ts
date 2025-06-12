@@ -18,26 +18,32 @@ export type Pagination = {
 export async function searchData(
   query?: string,
   page: number = 1,
-  perPage?: number
+  perPage?: number,
+  isAdmin: boolean = false
 ): Promise<{ data: results[]; pagination: Pagination }> {
   const currentPage = page || 1;
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;
 
-  const searchWords = query?.split(/\s+/).filter(Boolean) || [];
+  const idMatch = query?.trim().match(/^id:(\d+)$/i);
 
-  const where: Prisma.resultsWhereInput = searchWords.length
-    ? {
-        AND: searchWords.map((word) => ({
-          OR: [
-            { invNumber: { contains: word } },
-            { originalContent: { contains: word } },
-            { total: { contains: word } },
-            { nasLocation: { contains: word } },
-          ],
-        })),
-      }
-    : {};
+  const where: Prisma.resultsWhereInput = idMatch
+    ? { id: Number(idMatch[1]) }
+    : (() => {
+        const searchWords = query?.split(/\s+/).filter(Boolean) || [];
+        return searchWords.length
+          ? {
+              AND: searchWords.map((word) => ({
+                OR: [
+                  { invNumber: { contains: word } },
+                  { originalContent: { contains: word } },
+                  { total: { contains: word } },
+                  { nasLocation: { contains: word } },
+                ],
+              })),
+            }
+          : {};
+      })();
 
   const [total, data] = await Promise.all([
     prisma.results.count({ where }),
@@ -52,8 +58,20 @@ export async function searchData(
   const lastVisiblePage = Math.ceil(total / currentPerPage);
   const hasNextPage = currentPage < lastVisiblePage;
 
+  const isNotAdminData = data.map((item) => ({
+    ...item,
+    invNumber: null,
+    originalContent:
+      item.originalContent !== null
+        ? item.originalContent
+            .split("\n")
+            .filter((line) => !/^\s*INV#:/i.test(line))
+            .join("\n")
+        : "",
+  }));
+
   return {
-    data,
+    data: isAdmin ? data : isNotAdminData,
     pagination: {
       lastVisiblePage,
       hasNextPage,
@@ -126,7 +144,13 @@ export async function searchDataPublic(
   query?: string,
   page: number = 1,
   perPage: number = 10
-): Promise<{ data: results[]; pagination: Pagination }> {
+): Promise<{
+  data: {
+    id: number;
+    imagePath: string | null;
+  }[];
+  pagination: Pagination;
+}> {
   const currentPage = page || 1;
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;
@@ -149,6 +173,10 @@ export async function searchDataPublic(
   const [total, data] = await Promise.all([
     prisma.results.count({ where }),
     prisma.results.findMany({
+      select: {
+        id: true,
+        imagePath: true,
+      },
       where,
       skip,
       take: currentPerPage,

@@ -88,9 +88,11 @@ export default function CustomRow({
         <TableCell>
           <CellCopy name="Date" value={formatDate(data.created_at) || ""} />
         </TableCell>
-        <TableCell>
-          <CellCopy name="Invoice ID" value={data.invNumber || ""} />
-        </TableCell>
+        {isAdmin && (
+          <TableCell>
+            <CellCopy name="Invoice ID" value={data.invNumber || ""} />
+          </TableCell>
+        )}
         {isAdmin && (
           <TableCell>
             <CellCopy name="NAS Location" value={data.nasLocation || ""} />
@@ -111,7 +113,7 @@ export default function CustomRow({
         )}
       </TableRow>
       <TableRow className="border-0">
-        <TableCell colSpan={isAdmin ? 7 : 5} className="p-0">
+        <TableCell colSpan={isAdmin ? 7 : 4} className="p-0">
           <Accordion type="single" value={expand} onValueChange={setExpand}>
             <AccordionItem value="item">
               <AccordionContent
@@ -120,30 +122,34 @@ export default function CustomRow({
                 id={data.invNumber || "null"}
               >
                 <div className="hidden sm:flex flex-col gap-2">
-                  <div className="flex flex-col gap-0">
-                    <div className="flex gap-2 items-center">
-                      <p className="text-primary font-bold">{data.invNumber}</p>
-                      <Button
-                        variant={"ghost"}
-                        size={"icon"}
-                        onClick={() => copy(data.invNumber || "null")}
-                        className="w-8 h-8 text-foreground/60"
-                      >
-                        <Copy />
-                      </Button>
+                  {isAdmin && (
+                    <div className="flex flex-col gap-0">
+                      <div className="flex gap-2 items-center">
+                        <p className="text-primary font-bold">
+                          {data.invNumber}
+                        </p>
+                        <Button
+                          variant={"ghost"}
+                          size={"icon"}
+                          onClick={() => copy(data.invNumber || "null")}
+                          className="w-8 h-8 text-foreground/60"
+                        >
+                          <Copy />
+                        </Button>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <p>{data.nasLocation}</p>
+                        <Button
+                          variant={"ghost"}
+                          size={"icon"}
+                          onClick={() => copy(data.nasLocation || "null")}
+                          className="w-8 h-8 text-foreground/60"
+                        >
+                          <Copy />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2 items-center">
-                      <p>{data.nasLocation}</p>
-                      <Button
-                        variant={"ghost"}
-                        size={"icon"}
-                        onClick={() => copy(data.nasLocation || "null")}
-                        className="w-8 h-8 text-foreground/60"
-                      >
-                        <Copy />
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                   <div className="border-border border-[1px] rounded-lg flex gap-8 p-4">
                     <div className="flex w-full overflow-x-auto text-foreground/60 text-xs relative group">
                       <pre>{data.originalContent}</pre>
@@ -182,30 +188,34 @@ export default function CustomRow({
                   </div>
                 </div>
                 <div className="flex sm:hidden flex-col gap-2">
-                  <div className="flex flex-col gap-0">
-                    <div className="flex gap-2 items-center">
-                      <p className="text-primary font-bold">{data.invNumber}</p>
-                      <Button
-                        variant={"ghost"}
-                        size={"icon"}
-                        onClick={() => copy(data.invNumber || "null")}
-                        className="w-8 h-8 text-foreground/60"
-                      >
-                        <Copy />
-                      </Button>
+                  {isAdmin && (
+                    <div className="flex flex-col gap-0">
+                      <div className="flex gap-2 items-center">
+                        <p className="text-primary font-bold">
+                          {data.invNumber}
+                        </p>
+                        <Button
+                          variant={"ghost"}
+                          size={"icon"}
+                          onClick={() => copy(data.invNumber || "null")}
+                          className="w-8 h-8 text-foreground/60"
+                        >
+                          <Copy />
+                        </Button>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <p>{data.nasLocation}</p>
+                        <Button
+                          variant={"ghost"}
+                          size={"icon"}
+                          onClick={() => copy(data.nasLocation || "null")}
+                          className="w-8 h-8 text-foreground/60"
+                        >
+                          <Copy />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2 items-center">
-                      <p>{data.nasLocation}</p>
-                      <Button
-                        variant={"ghost"}
-                        size={"icon"}
-                        onClick={() => copy(data.nasLocation || "null")}
-                        className="w-8 h-8 text-foreground/60"
-                      >
-                        <Copy />
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                   <div className="border-border border-[1px] rounded-lg flex flex-col-reverse gap-8 p-4">
                     <div className="flex w-full overflow-x-auto text-foreground/60 text-xs relative group">
                       <pre>{data.originalContent}</pre>

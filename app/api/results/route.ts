@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       images:
         results.data.map((item) => ({
           path: item.imagePath,
-          invoice: item.invNumber,
+          id: item.id,
         })) || [],
     },
     { status: 201 }
