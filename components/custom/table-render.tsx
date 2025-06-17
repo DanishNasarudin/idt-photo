@@ -1,5 +1,5 @@
 import { searchData, SearchDataProps } from "@/services/results";
-import TableDisplay from "./table";
+import { TableDisplay } from "./table";
 
 export default async function TableRender({
   data,

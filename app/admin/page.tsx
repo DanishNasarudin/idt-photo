@@ -60,8 +60,8 @@ export default async function AdminPage({
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
         <Suspense
           key={`carousel-${query ?? ""}-${currentPage}-${currentPerPage}-${
-            currentSelected ?? ""
-          }-${currentSort ?? ""}`}
+            currentSort ?? ""
+          }`}
           fallback={<CarouselSkeleton />}
         >
           <CarouselRender data={dataPayload} />
@@ -69,8 +69,8 @@ export default async function AdminPage({
         <InputSearch />
         <Suspense
           key={`${query ?? ""}-${currentPage}-${currentPerPage}-${
-            currentSelected ?? ""
-          }-${currentSort ?? ""}`}
+            currentSort ?? ""
+          }`}
           fallback={<TableSkeleton isAdmin />}
         >
           <TableRender

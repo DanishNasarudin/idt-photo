@@ -1,5 +1,5 @@
 import { searchData, SearchDataProps } from "@/services/results";
-import CarouselDisplay from "./carousel";
+import { CarouselDisplay } from "./carousel";
 
 export default async function CarouselRender({
   data,

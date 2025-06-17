@@ -1,9 +1,10 @@
 "use client";
 import { results } from "@/db/generated/prisma";
 import { updateManyData } from "@/services/results";
+import equal from "fast-deep-equal";
 import { X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -19,7 +20,7 @@ import SortModuleContext from "./sort-context";
 import StatusDropdown from "./status-dropdown";
 import CustomRow from "./table-row";
 
-export default function TableDisplay({
+function TableDisplayPure({
   data = [],
   selectedRow = null,
   isAdmin = false,
@@ -174,3 +175,8 @@ export default function TableDisplay({
     </>
   );
 }
+
+export const TableDisplay = memo(TableDisplayPure, (prevProps, nextProps) => {
+  if (!equal(prevProps, nextProps)) return false;
+  return true;
+});

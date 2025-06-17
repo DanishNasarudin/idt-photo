@@ -2,9 +2,10 @@
 import { results } from "@/db/generated/prisma";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/services/results";
+import equal from "fast-deep-equal";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Carousel,
   CarouselApi,
@@ -14,7 +15,7 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 
-export default function CarouselDisplay({
+function CarouselDisplayPure({
   data,
   pagination,
 }: {
@@ -134,3 +135,11 @@ export default function CarouselDisplay({
     </Carousel>
   );
 }
+
+export const CarouselDisplay = memo(
+  CarouselDisplayPure,
+  (prevProps, nextProps) => {
+    if (!equal(prevProps, nextProps)) return false;
+    return true;
+  }
+);
