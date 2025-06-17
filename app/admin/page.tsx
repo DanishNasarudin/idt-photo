@@ -46,9 +46,9 @@ export default async function AdminPage({
     <div className="p-4 pt-8 flex flex-col gap-4 items-center">
       <h1 className="font-bold text-lg">Insert PC Photo</h1>
       <DataEntry />
-      <div className="max-w-[1000px] space-y-2 border-border border-t-[1px]">
+      <div className="max-w-[1000px] space-y-2 border-border border-t-[1px] w-full">
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
-        <CarouselDisplay data={data.data} />
+        <CarouselDisplay data={data.data} pagination={data.pagination} />
         <InputSearch />
         <TableDisplay data={data.data} selectedRow={currentSelected} isAdmin />
         <Paginate data={data.pagination} />

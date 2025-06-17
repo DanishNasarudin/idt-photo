@@ -1,21 +1,51 @@
 "use client";
 import { results } from "@/db/generated/prisma";
 import { cn } from "@/lib/utils";
+import { Pagination } from "@/services/results";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
 
-type Props = {};
-
-export default function CarouselDisplay({ data }: { data: results[] }) {
+export default function CarouselDisplay({
+  data,
+  pagination,
+}: {
+  data: results[];
+  pagination: Pagination;
+}) {
   const { replace } = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [slidesToScroll, setSlidesToScroll] = useState<number>(3);
+  const [pageValue, setPageValue] = useState(
+    Number(searchParams.get("page")?.toString()) || pagination.currentPage || 1
+  );
+  const [embla, setEmbla] = useState<CarouselApi>();
+  const dataMemo = useMemo(() => {
+    embla?.scrollTo(0);
+    return data;
+  }, [data]);
+
+  useEffect(() => {
+    if (pagination.currentPage !== pageValue)
+      setPageValue(pagination.currentPage);
+  }, [pagination]);
+
+  useEffect(() => {
+    const updateSlides = () => {
+      setSlidesToScroll(window.innerWidth < 640 ? 2 : 3);
+    };
+    updateSlides();
+    window.addEventListener("resize", updateSlides);
+    return () => window.removeEventListener("resize", updateSlides);
+  }, []);
 
   const handleSelect = (term: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -27,13 +57,25 @@ export default function CarouselDisplay({ data }: { data: results[] }) {
     replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  const handlePage = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    setPageValue(page);
+    if (page > 1) params.set("page", String(page));
+    else params.delete("page");
+    replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   return (
-    <Carousel className="pb-4">
+    <Carousel
+      setApi={setEmbla}
+      className="mb-12 sm:mb-4"
+      opts={{ slidesToScroll }}
+    >
       <CarouselContent>
-        {data.map((item) => (
+        {dataMemo.map((item) => (
           <CarouselItem
             key={item.id}
-            className="sm:basis-1/3"
+            className="basis-1/2 sm:basis-1/3"
             onClick={() => handleSelect(item.id)}
           >
             <img
@@ -45,10 +87,24 @@ export default function CarouselDisplay({ data }: { data: results[] }) {
           </CarouselItem>
         ))}
       </CarouselContent>
-      {data.length > 3 && (
+      {dataMemo.length > slidesToScroll && (
         <>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious
+            onClick={() =>
+              embla?.canScrollPrev()
+                ? embla.scrollPrev()
+                : handlePage(pageValue - 1)
+            }
+            disabled={pageValue <= 1 && !embla?.canScrollPrev()}
+          />
+          <CarouselNext
+            onClick={() =>
+              embla?.canScrollNext()
+                ? embla.scrollNext()
+                : handlePage(pageValue + 1)
+            }
+            disabled={pageValue > 1 && !embla?.canScrollNext()}
+          />
         </>
       )}
     </Carousel>
