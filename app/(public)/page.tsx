@@ -46,7 +46,7 @@ export default async function Home({
         <InputSearch />
         <Suspense
           key={`${query ?? ""}-${currentPage}-${currentPerPage}`}
-          fallback={<TableSkeleton />}
+          fallback={<TableSkeleton perPage={currentPerPage} />}
         >
           <TableRender data={dataPayload} currentSelected={currentSelected} />
         </Suspense>

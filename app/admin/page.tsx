@@ -71,7 +71,7 @@ export default async function AdminPage({
           key={`${query ?? ""}-${currentPage}-${currentPerPage}-${
             currentSort ?? ""
           }`}
-          fallback={<TableSkeleton isAdmin />}
+          fallback={<TableSkeleton perPage={currentPerPage} isAdmin />}
         >
           <TableRender
             data={dataPayload}

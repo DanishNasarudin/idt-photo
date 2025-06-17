@@ -9,8 +9,10 @@ import {
 } from "../ui/table";
 
 export default function TableSkeleton({
+  perPage = 10,
   isAdmin = false,
 }: {
+  perPage?: number;
   isAdmin?: boolean;
 }) {
   return (
@@ -53,7 +55,7 @@ export default function TableSkeleton({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {[...Array(10)].map((item, idx) => {
+          {[...Array(perPage)].map((_, idx) => {
             return (
               <TableRow key={idx}>
                 <TableCell>
