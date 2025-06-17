@@ -28,6 +28,8 @@ export default function CarouselDisplay({
     Number(searchParams.get("page")?.toString()) || pagination.currentPage || 1
   );
   const [embla, setEmbla] = useState<CarouselApi>();
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
   const dataMemo = useMemo(() => {
     embla?.scrollTo(0);
     return data;
@@ -46,6 +48,21 @@ export default function CarouselDisplay({
     window.addEventListener("resize", updateSlides);
     return () => window.removeEventListener("resize", updateSlides);
   }, []);
+
+  useEffect(() => {
+    if (!embla) return;
+    const updateButtons = () => {
+      setCanScrollPrev(embla.canScrollPrev());
+      setCanScrollNext(embla.canScrollNext());
+    };
+    updateButtons();
+    embla.on("select", updateButtons);
+    embla.on("reInit", updateButtons);
+    return () => {
+      embla.off("select", updateButtons);
+      embla.off("reInit", updateButtons);
+    };
+  }, [embla]);
 
   const handleSelect = (term: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -91,19 +108,17 @@ export default function CarouselDisplay({
         <>
           <CarouselPrevious
             onClick={() =>
-              embla?.canScrollPrev()
-                ? embla.scrollPrev()
-                : handlePage(pageValue - 1)
+              canScrollPrev ? embla!.scrollPrev() : handlePage(pageValue - 1)
             }
-            disabled={pageValue <= 1 && !embla?.canScrollPrev()}
+            disabled={!canScrollPrev && pageValue <= 1}
+            hasMorePage={!canScrollPrev && pageValue > 1}
           />
           <CarouselNext
             onClick={() =>
-              embla?.canScrollNext()
-                ? embla.scrollNext()
-                : handlePage(pageValue + 1)
+              canScrollNext ? embla!.scrollNext() : handlePage(pageValue + 1)
             }
-            disabled={pageValue > 1 && !embla?.canScrollNext()}
+            disabled={!canScrollNext && !pagination.hasNextPage}
+            hasMorePage={!canScrollNext && pagination.hasNextPage}
           />
         </>
       )}

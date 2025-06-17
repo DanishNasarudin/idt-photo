@@ -9,7 +9,7 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -32,6 +32,12 @@ export default function Paginate({ data }: { data: Pagination }) {
 
   const { replace } = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (data.currentPage !== pageValue) setPageValue(data.currentPage);
+    if (data.items.perPage !== perPageValue)
+      setPerPageValue(data.items.perPage);
+  }, [data]);
 
   const handlePage = (term: number) => {
     const params = new URLSearchParams(searchParams.toString());
