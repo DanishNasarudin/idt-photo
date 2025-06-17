@@ -1,6 +1,6 @@
 "use client";
 import { parseComponents } from "@/scripts/populate-components";
-import { checkDuplicates } from "@/services/results";
+import { checkDuplicates, createData } from "@/services/results";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -155,13 +155,9 @@ export default function DataEntry() {
           ...parseComponents(item.originalContent),
         }));
 
-        const res = await fetch("/api/insert", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const res = await createData(payload);
 
-        if (!res.ok) throw new Error("Insert failed");
+        if (!res) throw new Error("Insert failed");
         setSanitisedData([]);
         setSpecs("");
         setNasLocation("");

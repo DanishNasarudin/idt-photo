@@ -135,6 +135,7 @@ export async function createData(
     data,
   });
 
+  revalidatePath("/");
   revalidatePath("/admin");
 
   return response;
