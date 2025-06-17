@@ -116,7 +116,7 @@ export default function TableDisplay({
           <Button variant={"outline"} onClick={handleExpandAll}>
             {expandedRows.length > 0 ? "Collapse All" : "Expand All"}
           </Button>
-          <SortModuleContext />
+          {isAdmin && <SortModuleContext />}
         </div>
         {selectedRows.length > 0 && (
           <div className="flex items-center gap-2">
