@@ -38,18 +38,14 @@ export default async function Home({
       <div className="max-w-[1000px] space-y-2 w-full">
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
         <Suspense
-          key={`carousel-${query ?? ""}-${currentPage}-${currentPerPage}-${
-            currentSelected ?? ""
-          }`}
+          key={`carousel-${query ?? ""}-${currentPage}-${currentPerPage}`}
           fallback={<CarouselSkeleton />}
         >
           <CarouselRender data={dataPayload} />
         </Suspense>
         <InputSearch />
         <Suspense
-          key={`${query ?? ""}-${currentPage}-${currentPerPage}-${
-            currentSelected ?? ""
-          }`}
+          key={`${query ?? ""}-${currentPage}-${currentPerPage}`}
           fallback={<TableSkeleton />}
         >
           <TableRender data={dataPayload} currentSelected={currentSelected} />
