@@ -15,66 +15,109 @@ export type Pagination = {
   };
 };
 
+export type SortProps = {
+  type: string;
+  direction: "asc" | "desc";
+};
+
 export async function searchData(
   query?: string,
   page: number = 1,
-  perPage?: number,
-  isAdmin: boolean = false
+  perPage: number = 10,
+  isAdmin: boolean = false,
+  sort: SortProps[] = []
 ): Promise<{ data: results[]; pagination: Pagination }> {
   const currentPage = page || 1;
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;
 
+  const whereClauses: Prisma.Sql[] = [];
   const idMatch = query?.trim().match(/^id:(\d+)$/i);
+  if (idMatch) {
+    whereClauses.push(Prisma.sql`id = ${Number(idMatch[1])}`);
+  } else if (query) {
+    const terms = query.split(/\s+/).filter(Boolean);
+    if (terms.length) {
+      whereClauses.push(
+        Prisma.sql`(${Prisma.join(
+          terms.map(
+            (t) =>
+              Prisma.sql`(
+              invNumber     LIKE CONCAT('%', ${t}, '%')
+              OR originalContent LIKE CONCAT('%', ${t}, '%')
+              OR total         LIKE CONCAT('%', ${t}, '%')
+              OR nasLocation   LIKE CONCAT('%', ${t}, '%')
+            )`
+          ),
+          " AND "
+        )})`
+      );
+    }
+  }
+  const whereSql = whereClauses.length
+    ? Prisma.sql`WHERE ${Prisma.join(whereClauses, " AND ")}`
+    : Prisma.sql``;
 
-  const where: Prisma.resultsWhereInput = idMatch
-    ? { id: Number(idMatch[1]) }
-    : (() => {
-        const searchWords = query?.split(/\s+/).filter(Boolean) || [];
-        return searchWords.length
-          ? {
-              AND: searchWords.map((word) => ({
-                OR: [
-                  { invNumber: { contains: word } },
-                  { originalContent: { contains: word } },
-                  { total: { contains: word } },
-                  { nasLocation: { contains: word } },
-                ],
-              })),
-            }
-          : {};
-      })();
+  const statusSort = sort.find((s) => s.type === "status");
+  const otherSorts = sort.filter((s) => s.type !== "status");
+  const statusOrder = ["Ready", "Scheduled", "Posted"] as const;
 
-  const [total, data] = await Promise.all([
-    prisma.results.count({ where }),
-    prisma.results.findMany({
-      where,
-      skip,
-      take: currentPerPage,
-      orderBy: { created_at: "desc" },
-    }),
+  const orderClauses: string[] = [];
+
+  if (statusSort) {
+    const dir = statusSort.direction.toUpperCase();
+    orderClauses.push(
+      `FIELD(status, ${statusOrder.map((st) => `'${st}'`).join(", ")}) ${dir}`
+    );
+  }
+
+  if (otherSorts.length) {
+    orderClauses.push(
+      ...otherSorts.map((s) => `\`${s.type}\` ${s.direction.toUpperCase()}`)
+    );
+  }
+
+  if (orderClauses.length === 0) {
+    orderClauses.push("created_at DESC");
+  }
+
+  const orderByClause = `ORDER BY ${orderClauses.join(", ")}`;
+
+  const [countResult, rawRows] = await Promise.all([
+    prisma.$queryRaw<Array<{ count: bigint }>>(
+      Prisma.sql`SELECT COUNT(*) AS count FROM results ${whereSql}`
+    ),
+    prisma.$queryRaw<results[]>(
+      Prisma.sql`
+        SELECT *
+        FROM results
+        ${whereSql}
+        ${Prisma.raw(orderByClause)}
+        LIMIT ${skip}, ${currentPerPage}
+      `
+    ),
   ]);
 
-  const lastVisiblePage = Math.ceil(total / currentPerPage);
-  const hasNextPage = currentPage < lastVisiblePage;
+  const total = Number(countResult[0]?.count ?? 0);
+  const lastVisiblePage = Math.ceil(total / perPage);
 
-  const isNotAdminData = data.map((item) => ({
-    ...item,
-    invNumber: null,
-    originalContent:
-      item.originalContent !== null
-        ? item.originalContent
-            .split("\n")
-            .filter((line) => !/^\s*INV#:/i.test(line))
-            .join("\n")
-        : "",
-  }));
+  const data = isAdmin
+    ? rawRows
+    : rawRows.map((r) => ({
+        ...r,
+        invNumber: null,
+        originalContent:
+          r.originalContent
+            ?.split("\n")
+            .filter((l) => !/^\s*INV#:/i.test(l))
+            .join("\n") ?? "",
+      }));
 
   return {
-    data: isAdmin ? data : isNotAdminData,
+    data,
     pagination: {
       lastVisiblePage,
-      hasNextPage,
+      hasNextPage: currentPage < lastVisiblePage,
       currentPage,
       items: {
         count: data.length,
@@ -110,12 +153,16 @@ export async function deleteData(id: number) {
 }
 
 export async function updateData(id: number, data: Partial<results>) {
-  return prisma.results.update({
+  const response = prisma.results.update({
     where: {
       id,
     },
     data,
   });
+
+  revalidatePath("/admin");
+
+  return response;
 }
 
 export async function updateManyData(

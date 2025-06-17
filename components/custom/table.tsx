@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import SortModuleContext from "./sort-context";
 import StatusDropdown from "./status-dropdown";
 import CustomRow from "./table-row";
 
@@ -111,9 +112,12 @@ export default function TableDisplay({
   return (
     <>
       <div className="w-full flex justify-between">
-        <Button variant={"outline"} onClick={handleExpandAll}>
-          {expandedRows.length > 0 ? "Collapse All" : "Expand All"}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant={"outline"} onClick={handleExpandAll}>
+            {expandedRows.length > 0 ? "Collapse All" : "Expand All"}
+          </Button>
+          <SortModuleContext />
+        </div>
         {selectedRows.length > 0 && (
           <div className="flex items-center gap-2">
             <Button variant={"outline"} onClick={handleDeselectAll}>

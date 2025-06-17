@@ -3,7 +3,7 @@ import DataEntry from "@/components/custom/data-entry";
 import InputSearch from "@/components/custom/input-search";
 import Paginate from "@/components/custom/paginate";
 import TableDisplay from "@/components/custom/table";
-import { searchData } from "@/services/results";
+import { searchData, SortProps } from "@/services/results";
 
 export default async function AdminPage({
   searchParams,
@@ -13,14 +13,34 @@ export default async function AdminPage({
     page?: string;
     perPage?: string;
     select?: string;
+    sort?: string;
   }>;
 }) {
   const query = (await searchParams)?.search || undefined;
   const currentPage = Number((await searchParams)?.page) || 1;
   const currentPerPage = Number((await searchParams)?.perPage) || 10;
   const currentSelected = Number((await searchParams)?.select) || null;
+  const currentSort = (await searchParams)?.sort || undefined;
 
-  const data = await searchData(query, currentPage, currentPerPage, true);
+  const parseSort =
+    currentSort
+      ?.split(",")
+      .map((item) => {
+        const [type, direction] = item.split(":");
+        if (type && direction) {
+          return { type, direction } as SortProps;
+        }
+        return null;
+      })
+      .filter((entry): entry is SortProps => entry !== null) || [];
+
+  const data = await searchData(
+    query,
+    currentPage,
+    currentPerPage,
+    true,
+    parseSort
+  );
 
   return (
     <div className="p-4 pt-8 flex flex-col gap-4 items-center">
