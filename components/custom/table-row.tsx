@@ -3,6 +3,7 @@ import { results } from "@/db/generated/prisma";
 import { cn, formatDate } from "@/lib/utils";
 import { updateData } from "@/services/results";
 import { Copy } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -173,10 +174,16 @@ export default function CustomRow({
                       )}
                     >
                       {data.imagePath ? (
-                        <img
+                        <Image
+                          data-loaded="false"
+                          onLoad={(e) =>
+                            e.currentTarget.setAttribute("data-loaded", "true")
+                          }
                           src={data.imagePath}
                           alt={data.imagePath}
-                          className="w-full h-auto object-cover rounded-lg"
+                          width={459}
+                          height={306}
+                          className="data-[loaded=false]:bg-foreground/30 data-[loaded=false]:animate-pulse w-full h-auto object-cover rounded-lg"
                           draggable={false}
                         />
                       ) : (

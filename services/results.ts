@@ -20,13 +20,21 @@ export type SortProps = {
   direction: "asc" | "desc";
 };
 
-export async function searchData(
-  query?: string,
-  page: number = 1,
-  perPage: number = 10,
-  isAdmin: boolean = false,
-  sort: SortProps[] = []
-): Promise<{ data: results[]; pagination: Pagination }> {
+export type SearchDataProps = {
+  query?: string;
+  page?: number;
+  perPage?: number;
+  isAdmin?: boolean;
+  sort?: SortProps[];
+};
+
+export async function searchData({
+  query,
+  page = 1,
+  perPage = 10,
+  isAdmin = false,
+  sort = [],
+}: SearchDataProps): Promise<{ data: results[]; pagination: Pagination }> {
   const currentPage = page || 1;
   const currentPerPage = perPage || 10;
   const skip = (currentPage - 1) * currentPerPage;

@@ -1,9 +1,12 @@
-import CarouselDisplay from "@/components/custom/carousel";
+import CarouselRender from "@/components/custom/carousel-render";
+import CarouselSkeleton from "@/components/custom/carousel-skeleton";
 import DataEntry from "@/components/custom/data-entry";
 import InputSearch from "@/components/custom/input-search";
 import Paginate from "@/components/custom/paginate";
-import TableDisplay from "@/components/custom/table";
-import { searchData, SortProps } from "@/services/results";
+import TableRender from "@/components/custom/table-render";
+import TableSkeleton from "@/components/custom/table-skeleton";
+import { searchData, SearchDataProps, SortProps } from "@/services/results";
+import { Suspense } from "react";
 
 export default async function AdminPage({
   searchParams,
@@ -34,13 +37,20 @@ export default async function AdminPage({
       })
       .filter((entry): entry is SortProps => entry !== null) || [];
 
-  const data = await searchData(
+  const data = await searchData({
     query,
-    currentPage,
-    currentPerPage,
-    true,
-    parseSort
-  );
+    page: currentPage,
+    perPage: currentPerPage,
+    isAdmin: true,
+    sort: parseSort,
+  });
+  const dataPayload: SearchDataProps = {
+    query,
+    page: currentPage,
+    perPage: currentPerPage,
+    isAdmin: true,
+    sort: parseSort,
+  };
 
   return (
     <div className="p-4 pt-8 flex flex-col gap-4 items-center">
@@ -48,9 +58,27 @@ export default async function AdminPage({
       <DataEntry />
       <div className="max-w-[1000px] space-y-2 border-border border-t-[1px] w-full">
         <h1 className="font-bold text-lg text-center py-4">PC Photos</h1>
-        <CarouselDisplay data={data.data} pagination={data.pagination} />
+        <Suspense
+          key={`carousel-${query ?? ""}-${currentPage}-${currentPerPage}-${
+            currentSelected ?? ""
+          }-${currentSort ?? ""}`}
+          fallback={<CarouselSkeleton />}
+        >
+          <CarouselRender data={dataPayload} />
+        </Suspense>
         <InputSearch />
-        <TableDisplay data={data.data} selectedRow={currentSelected} isAdmin />
+        <Suspense
+          key={`${query ?? ""}-${currentPage}-${currentPerPage}-${
+            currentSelected ?? ""
+          }-${currentSort ?? ""}`}
+          fallback={<TableSkeleton isAdmin />}
+        >
+          <TableRender
+            data={dataPayload}
+            currentSelected={currentSelected}
+            isAdmin
+          />
+        </Suspense>
         <Paginate data={data.pagination} />
       </div>
       <div className="h-[200px]"></div>

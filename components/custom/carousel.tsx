@@ -2,6 +2,7 @@
 import { results } from "@/db/generated/prisma";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/services/results";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -89,16 +90,24 @@ export default function CarouselDisplay({
       opts={{ slidesToScroll }}
     >
       <CarouselContent>
-        {dataMemo.map((item) => (
+        {dataMemo.map((item, idx) => (
           <CarouselItem
             key={item.id}
             className="basis-1/2 sm:basis-1/3"
             onClick={() => handleSelect(item.id)}
           >
-            <img
+            <Image
+              data-loaded="false"
+              onLoad={(e) =>
+                e.currentTarget.setAttribute("data-loaded", "true")
+              }
+              priority={idx <= 3}
               src={item.imagePath || ""}
+              alt={`${item.id}`}
+              width={322}
+              height={215}
               className={cn(
-                "w-full h-auto object-cover rounded-lg border-transparent hover:border-foreground/60 border-[1px] transition-all cursor-pointer"
+                "data-[loaded=false]:bg-foreground/30 data-[loaded=false]:animate-pulse w-full h-auto object-cover rounded-lg border-transparent hover:border-foreground/60 border-[1px] transition-all cursor-pointer"
               )}
             />
           </CarouselItem>
