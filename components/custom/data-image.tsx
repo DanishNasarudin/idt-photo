@@ -3,6 +3,7 @@ import { convertFileToWebP } from "@/lib/utils";
 import equal from "fast-deep-equal";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
 import TooltipWrapper from "./tooltip-wrapper";
@@ -23,6 +24,8 @@ export default function DataImage({
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
   const [previews, setPreviews] = useState<PreviewFile[]>(value || []);
   const [converting, setConverting] = useState(false);
+  const [convertIndex, setConvertIndex] = useState(0);
+  const [convertTotal, setConvertTotal] = useState(0);
 
   useEffect(() => {
     if (!equal(previews, value)) setPreviews(value);
@@ -37,16 +40,22 @@ export default function DataImage({
       if (uniqueFiles.length === 0) return;
 
       setConverting(true);
-      try {
-        const converted: File[] = await Promise.all(
-          uniqueFiles.map((file) => convertFileToWebP(file))
-        );
+      setConvertTotal(uniqueFiles.length);
+      setConvertIndex(0);
 
-        const newPreviewFiles: PreviewFile[] = converted.map((file) =>
+      try {
+        const promises = uniqueFiles.map((file) =>
+          convertFileToWebP(file).then((conv) => {
+            flushSync(() => setConvertIndex((i) => i + 1));
+            return conv;
+          })
+        );
+        const converted = await Promise.all(promises);
+
+        const newPreviews = converted.map((file) =>
           Object.assign(file, { preview: URL.createObjectURL(file) })
         );
-
-        const updated = [...previews, ...newPreviewFiles];
+        const updated = [...previews, ...newPreviews];
         setPreviews(updated);
 
         if (hiddenInputRef.current) {
@@ -198,7 +207,9 @@ export default function DataImage({
       {converting && (
         <div className="flex flex-col items-center w-full gap-2">
           <Loader2 className="animate-spin" />
-          <p>Converting image to webp</p>
+          <p>
+            Converting image {convertIndex} of {convertTotal} to webp
+          </p>
         </div>
       )}
     </div>
