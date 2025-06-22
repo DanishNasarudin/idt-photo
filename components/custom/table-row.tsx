@@ -77,15 +77,17 @@ export default function CustomRow({
         onClick={handleExpand}
         className="cursor-pointer select-none [&>td]:overflow-hidden"
       >
-        <TableCell>
-          <Checkbox
-            checked={selected}
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation();
-              onSelected(data.id, e.shiftKey);
-            }}
-          />
-        </TableCell>
+        {isAdmin && (
+          <TableCell>
+            <Checkbox
+              checked={selected}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
+                onSelected(data.id, e.shiftKey);
+              }}
+            />
+          </TableCell>
+        )}
         <TableCell>
           <CellCopy name="Date" value={formatDate(data.created_at) || ""} />
         </TableCell>

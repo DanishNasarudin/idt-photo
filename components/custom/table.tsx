@@ -1,5 +1,6 @@
 "use client";
 import { results } from "@/db/generated/prisma";
+import { cn } from "@/lib/utils";
 import { updateManyData } from "@/services/results";
 import equal from "fast-deep-equal";
 import { X } from "lucide-react";
@@ -129,20 +130,29 @@ function TableDisplayPure({
           </div>
         )}
       </div>
-      <Table className="max-w-[1000px] mx-auto table-fixed w-full">
+      <Table
+        className={cn(
+          "max-w-[1000px] mx-auto table-fixed w-full",
+          !isAdmin && "table-auto"
+        )}
+      >
         <TableHeader className="select-none">
           <TableRow className="[&>th]:text-foreground/60 [&>th]:overflow-hidden">
-            <TableHead className="w-[50px]">
-              <Checkbox
-                checked={selectedRows.length === data.length && data.length > 0}
-                onCheckedChange={handleSelectAll}
-              />
-            </TableHead>
-            <TableHead className="w-[120px]">Date</TableHead>
+            {isAdmin && (
+              <TableHead className="w-[50px]">
+                <Checkbox
+                  checked={
+                    selectedRows.length === data.length && data.length > 0
+                  }
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
+            )}
+            <TableHead className="min-w-[120px]">Date</TableHead>
             {isAdmin && <TableHead className="w-[120px]">Invoice ID</TableHead>}
             {isAdmin && <TableHead className="w-[35%]">NAS Location</TableHead>}
-            <TableHead className="w-[120px]">Total</TableHead>
-            <TableHead className="w-[120px]">Status</TableHead>
+            <TableHead className={cn("min-w-[120px]")}>Total</TableHead>
+            <TableHead className="min-w-[120px]">Status</TableHead>
             {isAdmin && (
               <TableHead className="text-center w-[120px]">Actions</TableHead>
             )}
@@ -165,7 +175,7 @@ function TableDisplayPure({
             })}
           {dataMemo.length === 0 && (
             <TableRow>
-              <TableCell colSpan={isAdmin ? 7 : 4} className="text-center py-8">
+              <TableCell colSpan={isAdmin ? 7 : 3} className="text-center py-8">
                 No Data.
               </TableCell>
             </TableRow>
