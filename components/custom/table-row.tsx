@@ -13,7 +13,7 @@ import { TableCell, TableRow } from "../ui/table";
 import CellActions from "./cell-actions";
 import CellCopy from "./cell-copy";
 import CellDropdown from "./cell-dropdown";
-import SmartImage from "./smart-image";
+import { SmartImage } from "./smart-image";
 
 type Props = {
   data: results;
@@ -175,24 +175,34 @@ export default function CustomRow({
                         !data.imagePath && "bg-destructive/5"
                       )}
                     >
-                      {data.imagePath ? (
-                        <SmartImage
-                          data-loaded="false"
-                          onLoad={(e) =>
-                            e.currentTarget.setAttribute("data-loaded", "true")
-                          }
-                          src={`/api${data.imagePath}`}
-                          alt={data.imagePath}
-                          width={459}
-                          height={306}
-                          className="data-[loaded=false]:bg-foreground/30 data-[loaded=false]:animate-pulse w-full h-auto object-cover rounded-lg"
-                          draggable={false}
-                        />
-                      ) : (
-                        <p className="text-destructive text-xs">
-                          Missing Image
-                        </p>
-                      )}
+                      <div
+                        data-state={expand === "item" ? "open" : "closed"}
+                        className="w-full"
+                      >
+                        {expand === "item" && data.imagePath ? (
+                          <SmartImage
+                            data-loaded="false"
+                            onLoad={(e) =>
+                              e.currentTarget.setAttribute(
+                                "data-loaded",
+                                "true"
+                              )
+                            }
+                            src={`/api${data.imagePath}`}
+                            alt={data.imagePath}
+                            width={459}
+                            height={306}
+                            className="data-[loaded=false]:bg-foreground/30 data-[loaded=false]:animate-pulse w-full h-auto object-cover rounded-lg"
+                            draggable={false}
+                          />
+                        ) : (
+                          !data.imagePath && (
+                            <p className="text-destructive text-xs">
+                              Missing Image
+                            </p>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -247,18 +257,34 @@ export default function CustomRow({
                         !data.imagePath && "bg-destructive/5"
                       )}
                     >
-                      {data.imagePath ? (
-                        <img
-                          src={data.imagePath}
-                          alt={data.imagePath}
-                          className="w-full h-auto object-cover rounded-lg"
-                          draggable={false}
-                        />
-                      ) : (
-                        <p className="text-destructive text-xs">
-                          Missing Image
-                        </p>
-                      )}
+                      <div
+                        data-state={expand === "item" ? "open" : "closed"}
+                        className="w-full"
+                      >
+                        {expand === "item" && data.imagePath ? (
+                          <SmartImage
+                            data-loaded="false"
+                            onLoad={(e) =>
+                              e.currentTarget.setAttribute(
+                                "data-loaded",
+                                "true"
+                              )
+                            }
+                            src={`/api${data.imagePath}`}
+                            alt={data.imagePath}
+                            width={459}
+                            height={306}
+                            className="data-[loaded=false]:bg-foreground/30 data-[loaded=false]:animate-pulse w-full h-auto object-cover rounded-lg"
+                            draggable={false}
+                          />
+                        ) : (
+                          !data.imagePath && (
+                            <p className="text-destructive text-xs">
+                              Missing Image
+                            </p>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

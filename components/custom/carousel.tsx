@@ -13,7 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import SmartImage from "./smart-image";
+import { SmartImage } from "./smart-image";
 
 function CarouselDisplayPure({
   data,
@@ -29,7 +29,7 @@ function CarouselDisplayPure({
   const [pageValue, setPageValue] = useState(
     Number(searchParams.get("page")?.toString()) || pagination.currentPage || 1
   );
-  const [cacheBypass, setCacheBypass] = useState(false);
+
   const [embla, setEmbla] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
