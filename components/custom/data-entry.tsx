@@ -52,6 +52,11 @@ export default function DataEntry() {
           return regex.test(file.name);
         }) || null;
 
+      const imageTotalMatch = assignedImage?.name.match(/RM\d+/i)?.[0] ?? null;
+      const totalMatchesImage = imageTotalMatch
+        ? invoiceTotal.toLowerCase() === imageTotalMatch.toLowerCase()
+        : false;
+
       const missingSpecs = requiredSpecs.filter(
         (spec) => !originalContent.includes(spec)
       );
@@ -80,6 +85,10 @@ export default function DataEntry() {
 
       if (!assignedImage) {
         errorMessage += `Missing image, ensure image filename matches INV#.\n`;
+      }
+
+      if (assignedImage && !totalMatchesImage) {
+        errorMessage += `Total mismatch: Spec total (${invoiceTotal}) does not match image total (${imageTotalMatch}).\n`;
       }
 
       if (missingSpecs.length > 0) {
