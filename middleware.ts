@@ -5,7 +5,12 @@ import {
 } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/", "/api/results"]);
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/",
+  "/api/results",
+  "/api/uploads(.*)",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   let hostURL;

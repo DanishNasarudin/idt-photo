@@ -3,7 +3,6 @@ import { results } from "@/db/generated/prisma";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/services/results";
 import equal from "fast-deep-equal";
-import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { memo, useEffect, useMemo, useState } from "react";
 import {
@@ -14,6 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
+import SmartImage from "./smart-image";
 
 function CarouselDisplayPure({
   data,
@@ -29,6 +29,7 @@ function CarouselDisplayPure({
   const [pageValue, setPageValue] = useState(
     Number(searchParams.get("page")?.toString()) || pagination.currentPage || 1
   );
+  const [cacheBypass, setCacheBypass] = useState(false);
   const [embla, setEmbla] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -97,13 +98,13 @@ function CarouselDisplayPure({
             className="basis-1/2 sm:basis-1/3"
             onClick={() => handleSelect(item.id)}
           >
-            <Image
+            <SmartImage
               data-loaded="false"
               onLoad={(e) =>
                 e.currentTarget.setAttribute("data-loaded", "true")
               }
               priority={idx <= 3}
-              src={item.imagePath || ""}
+              src={`/api${item.imagePath}` || ""}
               alt={`${item.id}`}
               width={322}
               height={215}

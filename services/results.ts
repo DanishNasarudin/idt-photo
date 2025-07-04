@@ -139,7 +139,7 @@ export async function searchData({
 export async function createData(
   data: Partial<results>[]
 ): Promise<Prisma.BatchPayload> {
-  const response = prisma.results.createMany({
+  const response = await prisma.results.createMany({
     data,
   });
 

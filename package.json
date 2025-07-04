@@ -39,7 +39,8 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
     "use-debounce": "^10.0.5",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
