@@ -3,7 +3,6 @@ import { results } from "@/db/generated/prisma";
 import { cn, formatDate } from "@/lib/utils";
 import { updateData } from "@/services/results";
 import { Copy } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -14,6 +13,7 @@ import { TableCell, TableRow } from "../ui/table";
 import CellActions from "./cell-actions";
 import CellCopy from "./cell-copy";
 import CellDropdown from "./cell-dropdown";
+import SmartImage from "./smart-image";
 
 type Props = {
   data: results;
@@ -176,12 +176,12 @@ export default function CustomRow({
                       )}
                     >
                       {data.imagePath ? (
-                        <Image
+                        <SmartImage
                           data-loaded="false"
                           onLoad={(e) =>
                             e.currentTarget.setAttribute("data-loaded", "true")
                           }
-                          src={data.imagePath}
+                          src={`/api${data.imagePath}`}
                           alt={data.imagePath}
                           width={459}
                           height={306}
