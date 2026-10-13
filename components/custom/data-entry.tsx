@@ -1,4 +1,5 @@
 "use client";
+import { MAX_UPLOAD_SIZE } from "@/lib/chunked-upload-constants";
 import { parseComponents } from "@/scripts/populate-components";
 import { checkDuplicates, createData } from "@/services/results";
 import { useCallback, useState } from "react";
@@ -25,7 +26,7 @@ export default function DataEntry() {
   const [nasLocation, setNasLocation] = useState("");
   const [sanitisedData, setSanitisedData] = useState<SanitiseInputProps[]>([]);
 
-  const sanitiseInput = async (): Promise<SanitiseInputProps[]> => {
+  const sanitiseInput = useCallback(async (): Promise<SanitiseInputProps[]> => {
     const specsRegex = /INV#:\s*(\S*)[\s\S]*?Total\s*:\s*(RM\s?[0-9,]+)/gi;
     const invoices = Array.from(specs.matchAll(specsRegex));
     const filteredInvoices = invoices
@@ -106,28 +107,59 @@ export default function DataEntry() {
         errorMessage: errorMessage || null,
       };
     });
-  };
+  }, [specs, images, nasLocation]);
 
   const uploadFile = async (
     file: File,
     toastId: string | number
   ): Promise<string> => {
-    toast.loading(`Uploading ${file.name}`, { id: toastId });
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      toast.error(`Failed to upload ${file.name}`, { id: toastId });
-      throw new Error("Upload failed");
+    if (file.size > MAX_UPLOAD_SIZE) {
+      throw new Error(`${file.name} is larger than 10 MB`);
     }
 
-    const json = await response.json();
-    return json.path as string;
+    const sessionResponse = await fetch("/api/upload/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ size: file.size }),
+    });
+    if (!sessionResponse.ok) throw new Error(`Could not start upload for ${file.name}`);
+
+    const { id, chunkSize } = (await sessionResponse.json()) as {
+      id: string;
+      chunkSize: number;
+    };
+
+    try {
+      const chunkCount = Math.ceil(file.size / chunkSize);
+      for (let index = 0; index < chunkCount; index++) {
+        toast.loading(`Uploading ${file.name} (${index + 1}/${chunkCount})`, {
+          id: toastId,
+        });
+        const response = await fetch(
+          `/api/upload/sessions/${id}/chunks/${index}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/octet-stream" },
+            body: file.slice(index * chunkSize, (index + 1) * chunkSize),
+          }
+        );
+        if (!response.ok) throw new Error(`Failed to upload ${file.name}`);
+      }
+
+      toast.loading(`Finishing ${file.name}`, { id: toastId });
+      const response = await fetch(`/api/upload/sessions/${id}/complete`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error(`Failed to finish ${file.name}`);
+
+      const json = await response.json();
+      return json.path as string;
+    } catch (error) {
+      await fetch(`/api/upload/sessions/${id}`, { method: "DELETE" }).catch(
+        () => undefined
+      );
+      throw error;
+    }
   };
 
   const handleSubmit = useCallback(
@@ -173,10 +205,13 @@ export default function DataEntry() {
         setImages([]);
         toast.success("Data saved successfully", { id: toastId });
       } catch (err) {
-        toast.error("An error occurred", { id: toastId });
+        toast.error(
+          err instanceof Error ? err.message : "An error occurred",
+          { id: toastId }
+        );
       }
     },
-    [sanitisedData, setSanitisedData, sanitiseInput, images, specs, nasLocation]
+    [sanitisedData, setSanitisedData, sanitiseInput, images]
   );
 
   const handleOnValueChange = useCallback((id: string, newValue: any) => {
