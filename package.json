@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:quiet": "eslint . --ext .js,.jsx,.ts,.tsx --quiet",
     "typecheck": "tsc --noEmit",
+    "test:upload": "node --import tsx --test tests/chunked-upload.test.ts",
     "commitlint": "commitlint --edit",
     "prepare": "husky"
   },

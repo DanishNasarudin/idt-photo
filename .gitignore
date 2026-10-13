@@ -42,6 +42,7 @@ next-env.d.ts
 
 /db/generated/prisma
 /public/uploads
+/.upload-staging
 
 # husky
 .husky/_/
